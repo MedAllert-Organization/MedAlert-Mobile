@@ -1,0 +1,220 @@
+import { useRouter } from "expo-router";
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  useTransition,
+} from "react";
+import { ActivityIndicator, Alert } from "react-native";
+import * as SecureStore from "expo-secure-store";
+
+const TOKEN_KEY = "medallert.token" as const;
+
+type User = { id: string };
+type LoginCredentials = { email: string; password: string };
+type CreateAccountCredentials = LoginCredentials & {
+  phone: string;
+  fullName: string;
+};
+type ConfirmAccountCredentials = { code: string; email: string };
+type SendPasswordRecoveryCodeCredentials = { email: string };
+type ChangePasswordCredentials = ConfirmAccountCredentials & {
+  newPassword: string;
+};
+
+type AuthContexType = {
+  user: User | null;
+  isLoading: boolean;
+  isLoggedIn: boolean;
+  isReady: boolean;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  logout: () => Promise<void>;
+  createAccount: (credentials: CreateAccountCredentials) => Promise<void>;
+  confirmAccount: (credentials: ConfirmAccountCredentials) => Promise<void>;
+  sendPasswordRecoveryCode: (
+    credentials: SendPasswordRecoveryCodeCredentials,
+  ) => Promise<void>;
+  changePassword: (credentials: ChangePasswordCredentials) => Promise<void>;
+};
+
+const AuthContext = createContext({} as AuthContexType);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const [isLoading, startLoadingTransition] = useTransition();
+  const [user, setUser] = useState<User | null>(null);
+  const [isReady, setIsReady] = useState(false);
+  const isLoggedIn = user !== null;
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const token = await SecureStore.getItemAsync(TOKEN_KEY);
+      if (!mounted) return;
+      if (token) {
+        setUser({ id: token });
+        // TODO: decode token, validate and set proper id
+      }
+      setIsReady(true);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const login = useCallback(async (login: LoginCredentials): Promise<void> => {
+    startLoadingTransition(async () => {
+      try {
+        const res = await fetch("http://192.168.100.3:3000/auth/login", {
+          method: "POST",
+          body: JSON.stringify(login),
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) {
+          throw "Failed login";
+        }
+
+        const { token }: { token: string } = await res.json();
+
+        setUser({ id: token });
+        await SecureStore.setItemAsync(TOKEN_KEY, token);
+      } catch (error) {
+        console.error(error);
+        throw "Failed login";
+      }
+    });
+  }, []);
+
+  const createAccount = useCallback(
+    async (createAccount: CreateAccountCredentials): Promise<void> => {
+      startLoadingTransition(async () => {
+        try {
+          const res = await fetch("http://127.0.0.1:3000/auth/register", {
+            method: "POST",
+            body: JSON.stringify(createAccount),
+            headers: { "Content-Type": "application/json" },
+          });
+          if (!res.ok) {
+            throw "Failed to create account";
+          }
+        } catch (error) {
+          console.error(error);
+          throw "Failed to create account";
+        }
+      });
+    },
+    [],
+  );
+
+  const confirmAccount = useCallback(
+    async (confirm: ConfirmAccountCredentials): Promise<void> => {
+      startLoadingTransition(async () => {
+        try {
+          const res = await fetch(
+            "http://127.0.0.1:3000/auth/confirm-account",
+            {
+              method: "POST",
+              body: JSON.stringify(confirm),
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+          if (!res.ok) {
+            throw "Failed to confirm account";
+          }
+        } catch (error) {
+          console.error(error);
+          throw "Failed to confirm account";
+        }
+      });
+    },
+    [],
+  );
+
+  const sendPasswordRecoveryCode = useCallback(
+    async (_cred: SendPasswordRecoveryCodeCredentials): Promise<void> => {
+      startLoadingTransition(async () => {
+        try {
+          const res = await fetch(
+            "http://192.168.100.3:3000/auth/recover-password",
+            {
+              method: "POST",
+              body: JSON.stringify(confirm),
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+          if (!res.ok) {
+            Alert.alert("error on recovery");
+          }
+          router.push("/reset-password");
+        } catch (error) {
+          Alert.alert("Houve um erro ao enviar o código de recuperação.");
+          console.error(error);
+        }
+      });
+    },
+    [router],
+  );
+
+  const changePassword = useCallback(
+    async (changeCredentials: ChangePasswordCredentials): Promise<void> => {
+      startLoadingTransition(async () => {
+        try {
+          const res = await fetch(
+            "http://192.168.100.3:3000/auth/change-password",
+            {
+              method: "POST",
+              body: JSON.stringify(changeCredentials),
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+          if (!res.ok) {
+            Alert.alert("error on change password");
+          }
+          router.push("/");
+        } catch (error) {
+          Alert.alert("Houve um erro ao mudar a senha da conta.");
+          console.error(error);
+        }
+      });
+    },
+    [router],
+  );
+
+  const logout = useCallback(async (): Promise<void> => {
+    startLoadingTransition(async () => {
+      try {
+        setUser(null);
+        await SecureStore.deleteItemAsync(TOKEN_KEY);
+        router.replace("/login");
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  }, [router]);
+
+  if (!isReady) return <ActivityIndicator />;
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user: null,
+        isLoading,
+        isLoggedIn,
+        isReady,
+        login,
+        logout,
+        createAccount,
+        confirmAccount,
+        sendPasswordRecoveryCode,
+        changePassword,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export const useAuth = () => useContext(AuthContext);

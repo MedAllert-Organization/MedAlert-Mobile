@@ -1,10 +1,21 @@
 // import
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, useColorScheme } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  useColorScheme,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../constants/Colors";
+import { useAuth } from "@/providers/auth-provider";
 
 // funcao de login
 export default function Login() {
@@ -14,14 +25,20 @@ export default function Login() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
+  const { login, isLoading } = useAuth();
+
   // tratamento de erro
   const handleLogin = () => {
     if (!email || !password) {
       Alert.alert("Erro", "Preencha todos os campos!");
       return;
     }
-
-    Alert.alert("Login", `Email: ${email}\nSenha: ${password}`);
+    try {
+      login({ email, password });
+      router.push("/tabs/initial");
+    } catch {
+      Alert.alert("Houve um erro durante o login.");
+    }
   };
 
   return (
@@ -30,7 +47,7 @@ export default function Login() {
         colors={[
           "#61AEF0",
           colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2",
-          colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2"
+          colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2",
         ]}
         style={{ flex: 1 }}
       >
@@ -67,8 +84,13 @@ export default function Login() {
               <Text style={styles.buttonText}>Entrar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => router.push("/create-account")}>
-              <Text style={[styles.forgotLink, { color: theme.tint }]}>Esqueci minha senha</Text>
+            <TouchableOpacity
+              onPress={() => router.push("/create-account")}
+              disabled={isLoading}
+            >
+              <Text style={[styles.forgotLink, { color: theme.tint }]}>
+                Não possui uma conta?
+              </Text>
             </TouchableOpacity>
           </KeyboardAvoidingView>
         </SafeAreaView>
