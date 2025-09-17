@@ -1,25 +1,32 @@
-import React from "react";
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
-import { useColorScheme } from "@/components/useColorScheme";
+import { AppProvider } from "@/providers/app-provider";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === "dark" ? DarkTheme : DefaultTheme;
-
-  const isLoggedIn = true;
+  const { isLoggedIn } = useAuth();
 
   return (
-    <ThemeProvider value={theme}>
-      {!isLoggedIn ? <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="select-user-type" options={{ headerShown: false }} />
-        <Stack.Screen name="create-account" options={{ headerShown: false }} />
-      </Stack> 
-      : 
+    <AppProvider>
       <Stack>
-         <Stack.Screen name="tabs" options={{ headerShown: false}} />
-      </Stack>}
-    </ThemeProvider>
+        <Stack.Protected guard={!isLoggedIn}>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="create-account"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen name="verify-email" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="recover-account"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="change-password"
+            options={{ headerShown: false }}
+          />
+        </Stack.Protected>
+        <Stack.Screen name="tabs" options={{ headerShown: false }} />
+      </Stack>
+    </AppProvider>
   );
-} 
+}

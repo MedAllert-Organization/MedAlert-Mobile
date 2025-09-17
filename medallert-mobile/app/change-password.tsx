@@ -5,7 +5,7 @@ import Subtitle from "@/components/Subtitle";
 import TextField from "@/components/TextField";
 import Title from "@/components/Title";
 import { useAuth } from "@/providers/auth-provider";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
@@ -15,22 +15,24 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function RecoverAccount() {
-  const [email, setEmail] = useState<string>("");
+export default function ChangePassword() {
+  const { email } = useLocalSearchParams<{ email: string }>();
+  const [recoveryCode, setRecoveryCode] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
   const router = useRouter();
 
-  const { sendPasswordRecoveryCode, isLoading } = useAuth();
+  const { changePassword, isLoading } = useAuth();
 
-  const handleAccountRecovery = async () => {
-    if (!email) {
-      Alert.alert("Erro", "Preencha o seu email!");
+  const handleChangePassword = async () => {
+    if (!recoveryCode) {
+      Alert.alert("Erro", "Preencha o seu código!");
       return;
     }
     try {
-      await sendPasswordRecoveryCode({ email });
-      router.push({ pathname: "/change-password", params: { email } });
+      await changePassword({ email, newPassword, code: recoveryCode });
+      router.push("/login");
     } catch {
-      Alert.alert("Houve um erro ao enviar o código de recuperação.");
+      Alert.alert("Houve um erro ao mudar a senha da conta.");
     }
   };
 
@@ -42,21 +44,31 @@ export default function RecoverAccount() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <Title>MedAllert</Title>
-          <Subtitle>Inicie o processo de recuperacão de senha.</Subtitle>
+          <Subtitle>
+            Informe o código enviado para {email ?? "o seu email"}.
+          </Subtitle>
 
           <TextField
-            placeholder="E-mail"
+            placeholder="Código"
             placeholderTextColor="#999"
-            value={email}
-            onChangeText={setEmail}
+            value={recoveryCode}
+            onChangeText={setRecoveryCode}
             keyboardType="email-address"
             autoCapitalize="none"
+          />
+
+          <TextField
+            placeholder="Sua nova senha"
+            placeholderTextColor="#999"
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureTextEntry
           />
 
           <ButtonPrimary
             title="Recuperar conta"
             loading={isLoading}
-            onPress={handleAccountRecovery}
+            onPress={handleChangePassword}
           />
 
           <LinkText
