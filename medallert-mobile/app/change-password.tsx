@@ -10,30 +10,32 @@ import {
   Platform,
   useColorScheme,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../constants/Colors";
 import { useAuth } from "@/providers/auth-provider";
 
-export default function RecoverAccount() {
-  const [email, setEmail] = useState<string>("");
+export default function ChangePassword() {
+  const { email } = useLocalSearchParams<{ email: string }>();
+  const [recoveryCode, setRecoveryCode] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const { sendPasswordRecoveryCode, isLoading } = useAuth();
+  const { changePassword, isLoading } = useAuth();
 
-  const handleAccountRecovery = () => {
-    if (!email) {
-      Alert.alert("Erro", "Preencha o seu email!");
+  const handleChangePassword = () => {
+    if (!recoveryCode) {
+      Alert.alert("Erro", "Preencha o seu código!");
       return;
     }
     try {
-      sendPasswordRecoveryCode({ email });
-      router.push({ pathname: "/change-password", params: { email } });
+      changePassword({ email, newPassword, code: recoveryCode });
+      router.push("/login");
     } catch {
-      Alert.alert("Houve um erro ao enviar o código de recuperação.");
+      Alert.alert("Houve um erro ao mudar a senha da conta.");
     }
   };
 
@@ -54,22 +56,31 @@ export default function RecoverAccount() {
           >
             <Text style={[styles.title, { color: theme.tint }]}>MedAllert</Text>
             <Text style={[styles.subtitle, { color: theme.text }]}>
-              Inicie o processo de recuperacão de senha.
+              Informe o código enviado para {email ?? "o seu email"}.
             </Text>
 
             <TextInput
               style={styles.input}
-              placeholder="E-mail"
+              placeholder="Código"
               placeholderTextColor="#999"
-              value={email}
-              onChangeText={setEmail}
+              value={recoveryCode}
+              onChangeText={setRecoveryCode}
               keyboardType="email-address"
               autoCapitalize="none"
             />
 
+            <TextInput
+              style={styles.input}
+              placeholder="Sua nova senha"
+              placeholderTextColor="#999"
+              value={newPassword}
+              onChangeText={setNewPassword}
+              secureTextEntry
+            />
+
             <TouchableOpacity
               style={styles.button}
-              onPress={handleAccountRecovery}
+              onPress={handleChangePassword}
             >
               <Text style={styles.buttonText}>Recuperar conta</Text>
             </TouchableOpacity>

@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export default function Initial() {
   const { logout } = useAuth();
@@ -39,10 +40,12 @@ export default function Initial() {
           <View style={styles.header}>
             <Text style={[styles.title, { color: theme.text }]}>Summary</Text>
 
-            <View>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
               <View style={styles.avatar} />
               <TouchableOpacity onPress={() => logout()}>
-                <Text>Logout</Text>
+                <MaterialCommunityIcons name="logout" size={24} color="black" />
               </TouchableOpacity>
             </View>
           </View>

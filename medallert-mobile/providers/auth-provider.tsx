@@ -8,7 +8,7 @@ import {
   useState,
   useTransition,
 } from "react";
-import { ActivityIndicator, Alert } from "react-native";
+import { ActivityIndicator } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
 const TOKEN_KEY = "medallert.token" as const;
@@ -134,28 +134,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const sendPasswordRecoveryCode = useCallback(
-    async (_cred: SendPasswordRecoveryCodeCredentials): Promise<void> => {
+    async (recovery: SendPasswordRecoveryCodeCredentials): Promise<void> => {
       startLoadingTransition(async () => {
         try {
           const res = await fetch(
             "http://192.168.100.3:3000/auth/recover-password",
             {
               method: "POST",
-              body: JSON.stringify(confirm),
+              body: JSON.stringify(recovery),
               headers: { "Content-Type": "application/json" },
             },
           );
           if (!res.ok) {
-            Alert.alert("error on recovery");
+            throw "Failed to recover account";
           }
-          router.push("/reset-password");
         } catch (error) {
-          Alert.alert("Houve um erro ao enviar o código de recuperação.");
           console.error(error);
+          throw "Failed to recover account";
         }
       });
     },
-    [router],
+    [],
   );
 
   const changePassword = useCallback(
@@ -171,16 +170,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             },
           );
           if (!res.ok) {
-            Alert.alert("error on change password");
+            throw "Failed to change password";
           }
-          router.push("/");
         } catch (error) {
-          Alert.alert("Houve um erro ao mudar a senha da conta.");
           console.error(error);
+          throw "Failed to change password";
         }
       });
     },
-    [router],
+    [],
   );
 
   const logout = useCallback(async (): Promise<void> => {

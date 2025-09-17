@@ -89,7 +89,12 @@ export default function Login() {
               disabled={isLoading}
             >
               <Text style={[styles.forgotLink, { color: theme.tint }]}>
-                Não possui uma conta?
+                Não possui uma conta? Cadastre-se
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/recover-account")}>
+              <Text style={[styles.forgotLink, { color: theme.tint }]}>
+                Esqueceu a sua senha?
               </Text>
             </TouchableOpacity>
           </KeyboardAvoidingView>

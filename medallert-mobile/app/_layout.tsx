@@ -16,6 +16,14 @@ export default function RootLayout() {
             options={{ headerShown: false }}
           />
           <Stack.Screen name="verify-email" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="recover-account"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="change-password"
+            options={{ headerShown: false }}
+          />
         </Stack.Protected>
         <Stack.Screen name="tabs" options={{ headerShown: false }} />
       </Stack>
