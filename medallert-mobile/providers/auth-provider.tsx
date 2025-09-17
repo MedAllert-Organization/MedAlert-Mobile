@@ -9,6 +9,7 @@ import {
 } from "react";
 import { ActivityIndicator } from "react-native";
 import * as SecureStore from "expo-secure-store";
+import { getJwtSubIfNotExpired } from "@/utils/jwt";
 
 const TOKEN_KEY = "medallert.token" as const;
 
@@ -50,15 +51,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+
     (async () => {
-      const token = await SecureStore.getItemAsync(TOKEN_KEY);
-      if (!mounted) return;
-      if (token) {
-        setUser({ id: token });
-        // TODO: decode token, validate and set proper id
+      try {
+        const token = await SecureStore.getItemAsync(TOKEN_KEY);
+        if (!mounted) return;
+
+        if (token) {
+          const id = getJwtSubIfNotExpired(token);
+          if (id && mounted) {
+            setUser({ id });
+          }
+        }
+      } finally {
+        if (mounted) setIsReady(true);
       }
-      setIsReady(true);
     })();
+
     return () => {
       mounted = false;
     };
@@ -67,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (login: LoginCredentials): Promise<void> => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://192.168.100.3:3000/auth/login", {
+      const res = await fetch("http://127.0.0.1:3000/auth/login", {
         method: "POST",
         body: JSON.stringify(login),
         headers: { "Content-Type": "application/json" },
