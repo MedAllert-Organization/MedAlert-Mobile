@@ -1,106 +1,91 @@
-// import
+import { useAuth } from "@/providers/auth-provider";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
-  useColorScheme,
+  StyleSheet,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import Colors from "../constants/Colors";
-import { useAuth } from "@/providers/auth-provider";
+import LinkText from "@/components/LinkText";
+import ButtonPrimary from "@/components/ButtonPrimary";
+import TextField from "@/components/TextField";
+import Title from "@/components/Title";
+import Subtitle from "@/components/Subtitle";
+import Background from "@/components/Background";
 
-// funcao de login
 export default function Login() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
 
   const { login, isLoading } = useAuth();
 
-  // tratamento de erro
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Erro", "Preencha todos os campos!");
       return;
     }
     try {
-      login({ email, password });
+      await login({ email, password });
       router.push("/tabs/initial");
-    } catch {
+    } catch (e) {
+      console.error(e);
       Alert.alert("Houve um erro durante o login.");
     }
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={[
-          "#61AEF0",
-          colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2",
-          colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2",
-        ]}
-        style={{ flex: 1 }}
-      >
-        <SafeAreaView style={{ flex: 1 }}>
-          <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <Background>
+      <SafeAreaView style={{ flex: 1 }}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          <Title>MedAllert</Title>
+          <Subtitle>Bem-vindo! Faça login para continuar.</Subtitle>
+
+          <TextField
+            placeholder="E-mail"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            testID="email-input"
+          />
+
+          <TextField
+            placeholder="Senha"
+            placeholderTextColor="#999"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          <ButtonPrimary
+            title="Entrar"
+            onPress={handleLogin}
+            loading={isLoading}
+            testID="login-button"
+          />
+
+          <LinkText
+            onPress={() => router.push("/create-account")}
+            disabled={isLoading}
           >
-            <Text style={[styles.title, { color: theme.tint }]}>MedAllert</Text>
-            <Text style={[styles.subtitle, { color: theme.text }]}>
-              Bem-vindo! Faça login para continuar.
-            </Text>
+            Não possui uma conta? Cadastre-se
+          </LinkText>
 
-            <TextInput
-              style={styles.input}
-              placeholder="E-mail"
-              placeholderTextColor="#999"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Senha"
-              placeholderTextColor="#999"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-              <Text style={styles.buttonText}>Entrar</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.push("/create-account")}
-              disabled={isLoading}
-            >
-              <Text style={[styles.forgotLink, { color: theme.tint }]}>
-                Não possui uma conta? Cadastre-se
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push("/recover-account")}>
-              <Text style={[styles.forgotLink, { color: theme.tint }]}>
-                Esqueceu a sua senha?
-              </Text>
-            </TouchableOpacity>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      </LinearGradient>
-    </View>
+          <LinkText
+            onPress={() => router.push("/recover-account")}
+            disabled={isLoading}
+          >
+            Esqueceu a sua senha?
+          </LinkText>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </Background>
   );
 }
 
@@ -109,42 +94,5 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: "center",
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  input: {
-    height: 50,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 10,
-    marginBottom: 15,
-    paddingHorizontal: 15,
-    backgroundColor: "#fff",
-  },
-  button: {
-    height: 50,
-    backgroundColor: Colors.light.tint,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 15,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  forgotLink: {
-    textAlign: "center",
-    marginTop: 10,
   },
 });

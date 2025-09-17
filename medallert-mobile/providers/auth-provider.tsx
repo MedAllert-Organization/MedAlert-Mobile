@@ -6,7 +6,6 @@ import {
   useContext,
   useEffect,
   useState,
-  useTransition,
 } from "react";
 import { ActivityIndicator } from "react-native";
 import * as SecureStore from "expo-secure-store";
@@ -44,7 +43,7 @@ const AuthContext = createContext({} as AuthContexType);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [isLoading, startLoadingTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const [isReady, setIsReady] = useState(false);
   const isLoggedIn = user !== null;
@@ -66,131 +65,106 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (login: LoginCredentials): Promise<void> => {
-    startLoadingTransition(async () => {
-      try {
-        const res = await fetch("http://192.168.100.3:3000/auth/login", {
-          method: "POST",
-          body: JSON.stringify(login),
-          headers: { "Content-Type": "application/json" },
-        });
-        if (!res.ok) {
-          throw "Failed login";
-        }
-
-        const { token }: { token: string } = await res.json();
-
-        setUser({ id: token });
-        await SecureStore.setItemAsync(TOKEN_KEY, token);
-      } catch (error) {
-        console.error(error);
+    setIsLoading(true);
+    try {
+      const res = await fetch("http://192.168.100.3:3000/auth/login", {
+        method: "POST",
+        body: JSON.stringify(login),
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) {
         throw "Failed login";
       }
-    });
+
+      const { token }: { token: string } = await res.json();
+
+      setUser({ id: token });
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const createAccount = useCallback(
     async (createAccount: CreateAccountCredentials): Promise<void> => {
-      startLoadingTransition(async () => {
-        try {
-          const res = await fetch("http://127.0.0.1:3000/auth/register", {
-            method: "POST",
-            body: JSON.stringify(createAccount),
-            headers: { "Content-Type": "application/json" },
-          });
-          if (!res.ok) {
-            throw "Failed to create account";
-          }
-        } catch (error) {
-          console.error(error);
+      setIsLoading(true);
+      try {
+        const res = await fetch("http://127.0.0.1:3000/auth/register", {
+          method: "POST",
+          body: JSON.stringify(createAccount),
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) {
           throw "Failed to create account";
         }
-      });
+      } finally {
+        setIsLoading(false);
+      }
     },
     [],
   );
 
   const confirmAccount = useCallback(
     async (confirm: ConfirmAccountCredentials): Promise<void> => {
-      startLoadingTransition(async () => {
-        try {
-          const res = await fetch(
-            "http://127.0.0.1:3000/auth/confirm-account",
-            {
-              method: "POST",
-              body: JSON.stringify(confirm),
-              headers: { "Content-Type": "application/json" },
-            },
-          );
-          if (!res.ok) {
-            throw "Failed to confirm account";
-          }
-        } catch (error) {
-          console.error(error);
+      setIsLoading(true);
+      try {
+        const res = await fetch("http://127.0.0.1:3000/auth/confirm-account", {
+          method: "POST",
+          body: JSON.stringify(confirm),
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) {
           throw "Failed to confirm account";
         }
-      });
+      } finally {
+        setIsLoading(false);
+      }
     },
     [],
   );
 
   const sendPasswordRecoveryCode = useCallback(
     async (recovery: SendPasswordRecoveryCodeCredentials): Promise<void> => {
-      startLoadingTransition(async () => {
-        try {
-          const res = await fetch(
-            "http://192.168.100.3:3000/auth/recover-password",
-            {
-              method: "POST",
-              body: JSON.stringify(recovery),
-              headers: { "Content-Type": "application/json" },
-            },
-          );
-          if (!res.ok) {
-            throw "Failed to recover account";
-          }
-        } catch (error) {
-          console.error(error);
+      setIsLoading(true);
+      try {
+        const res = await fetch("http://127.0.0.1:3000/auth/recover-password", {
+          method: "POST",
+          body: JSON.stringify(recovery),
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) {
           throw "Failed to recover account";
         }
-      });
+      } finally {
+        setIsLoading(false);
+      }
     },
     [],
   );
 
   const changePassword = useCallback(
     async (changeCredentials: ChangePasswordCredentials): Promise<void> => {
-      startLoadingTransition(async () => {
-        try {
-          const res = await fetch(
-            "http://192.168.100.3:3000/auth/change-password",
-            {
-              method: "POST",
-              body: JSON.stringify(changeCredentials),
-              headers: { "Content-Type": "application/json" },
-            },
-          );
-          if (!res.ok) {
-            throw "Failed to change password";
-          }
-        } catch (error) {
-          console.error(error);
+      setIsLoading(true);
+      try {
+        const res = await fetch("http://127.0.0.1:3000/auth/change-password", {
+          method: "POST",
+          body: JSON.stringify(changeCredentials),
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) {
           throw "Failed to change password";
         }
-      });
+      } finally {
+        setIsLoading(false);
+      }
     },
     [],
   );
 
   const logout = useCallback(async (): Promise<void> => {
-    startLoadingTransition(async () => {
-      try {
-        setUser(null);
-        await SecureStore.deleteItemAsync(TOKEN_KEY);
-        router.replace("/login");
-      } catch (error) {
-        console.error(error);
-      }
-    });
+    setUser(null);
+    await SecureStore.deleteItemAsync(TOKEN_KEY);
+    router.replace("/login");
   }, [router]);
 
   if (!isReady) return <ActivityIndicator />;
