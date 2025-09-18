@@ -1,6 +1,6 @@
 import React from "react";
 import { View , StyleSheet, Text} from "react-native";
-import ProgressCircle from "./ProgressCircle"; 
+import ProgressCircle from "./progress-circle"; 
 
 type Medicine = {
     name: string;
