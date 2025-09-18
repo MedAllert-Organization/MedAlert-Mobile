@@ -7,12 +7,12 @@ type Props = {
 };
 
 const getProgressColor = (percentage: number) => {
-  if (percentage < 40) return '#d9534f'; // Vermelho
-  if (percentage < 70) return '#f0ad4e'; // Amarelo
-  return '#5cb85c'; // Verde
+  if (percentage < 40) return '#7dd3fc'; 
+  if (percentage < 70) return '#0ea5e9'; 
+  return '#1e3a8a'; 
 };
 
-export default function ProgressCircle({ percentage }: Props) {
+export default function InitialProgressCircleComponent({ percentage }: Props) {
   const size = 60;
   const strokeWidth = 6;
   const radius = (size - strokeWidth) / 2;
