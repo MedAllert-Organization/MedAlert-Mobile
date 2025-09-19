@@ -20,8 +20,8 @@ export default function CreateAccount() {
   const [password, setPassword] = useState<string>("");
   const [fullName, setFullName] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
-  const router = useRouter();
 
+  const router = useRouter();
   const { createAccount, isLoading } = useAuth();
 
   const handleCreateAccount = async () => {
@@ -29,11 +29,28 @@ export default function CreateAccount() {
       Alert.alert("Erro", "Preencha todos os campos!");
       return;
     }
+
+    // validações extras
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      Alert.alert("Erro", "Digite um e-mail válido!");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Erro", "A senha deve ter pelo menos 6 caracteres!");
+      return;
+    }
+
+    if (!/^\d+$/.test(phone)) {
+      Alert.alert("Erro", "Digite apenas números no telefone!");
+      return;
+    }
+
     try {
       await createAccount({ email, password, phone, fullName });
       router.push({ pathname: "/verify-email", params: { email } });
     } catch {
-      Alert.alert("Houve um erro na criação da conta.");
+      Alert.alert("Erro", "Houve um erro na criação da conta.");
     }
   };
 
@@ -52,8 +69,9 @@ export default function CreateAccount() {
             placeholderTextColor="#999"
             value={fullName}
             onChangeText={setFullName}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            autoCapitalize="words"
+            editable={!isLoading}
+            returnKeyType="next"
           />
 
           <TextField
@@ -61,8 +79,9 @@ export default function CreateAccount() {
             placeholderTextColor="#999"
             value={phone}
             onChangeText={setPhone}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            keyboardType="phone-pad"
+            editable={!isLoading}
+            returnKeyType="next"
           />
 
           <TextField
@@ -72,6 +91,9 @@ export default function CreateAccount() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            autoCorrect={false}
+            editable={!isLoading}
+            returnKeyType="next"
           />
 
           <TextField
@@ -80,13 +102,18 @@ export default function CreateAccount() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!isLoading}
+            returnKeyType="done"
           />
 
           <ButtonPrimary
             title="Criar Conta"
             onPress={handleCreateAccount}
             loading={isLoading}
-            testID="login-button"
+            disabled={isLoading}
+            testID="create-account-button"
           />
 
           <LinkText onPress={() => router.push("/login")} disabled={isLoading}>
