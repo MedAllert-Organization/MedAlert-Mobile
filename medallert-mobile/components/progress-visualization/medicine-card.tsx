@@ -1,15 +1,15 @@
 import React from "react";
-import { View , StyleSheet, Text} from "react-native";
-import ProgressCircle from "./progress-circle"; 
+import { View, StyleSheet, Text } from "react-native";
+import ProgressCircle from "./progress-circle";
 
 type Medicine = {
-    name: string;
-    percentage: string;
-    dosage: string
+  name: string;
+  percentage: string;
+  dosage: string
 };
 
 type Props = {
-    medicines: Medicine[];
+  medicines: Medicine[];
 };
 
 export default function MedicineComponent({ medicines }: Props) {
@@ -33,32 +33,32 @@ export default function MedicineComponent({ medicines }: Props) {
 }
 
 const styles = StyleSheet.create({
-    card:{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: 14,
-        padding: 16,
-        marginBottom: 12,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 4 },
-        shadowRadius: 10,
-        elevation: 5,
-    },
-    infoContainer: {
-        flex: 1,
-        marginRight: 16,
-    },
-    medicineName: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    dosage: {
-        fontSize: 14,
-        color: '#666',
-        marginTop: 4,
-    }
+  card: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  infoContainer: {
+    flex: 1,
+    marginRight: 16,
+  },
+  medicineName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  dosage: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  }
 });

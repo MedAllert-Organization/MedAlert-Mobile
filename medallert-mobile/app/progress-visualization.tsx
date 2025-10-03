@@ -18,14 +18,12 @@ export default function ProgressVisualization() {
     { name: "Lorazepam", dosage: "1mg - 1x ao dia", percentage: "30" },
   ];
 
-let average = 0;
-
-for (let i = 0; i < medicines.length; i++) {
-  let num = parseInt(medicines[i].percentage, 10);
-  average += num;
-}
-
-average = average / medicines.length;
+  let average = 0;
+  for (let i = 0; i < medicines.length; i++) {
+    let num = parseInt(medicines[i].percentage, 10);
+    average += num;
+  }
+  average = average / medicines.length;
 
   return (
     <View style={{ flex: 1 }}>
@@ -45,16 +43,14 @@ average = average / medicines.length;
               textShadowColor: 'black',
               textShadowOffset: { width: -1, height: 1 }
             }]}>Progresso</Text>
-
             <Text style={[styles.titleSubtitle,
             {
               textShadowColor: 'black',
               textShadowOffset: { width: -1, height: 1 }
             }]}>Acompanhe seus medicamentos</Text>
-
             <View style={[styles.medicineCardContainer]}>
               <InitialMedicineComponent medicines={medicines} />
-              <ProgressSummary average={average} />
+              <ProgressSummary average={average} medicines={medicines} />
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -70,7 +66,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 5,
   },
-
   titleSubtitle: {
     color: 'white',
     fontSize: 20,
@@ -78,10 +73,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 5,
   },
-
   medicineCardContainer: {
     justifyContent: "center",
     marginTop: 20,
     paddingHorizontal: 16,
   }
-})
+});
