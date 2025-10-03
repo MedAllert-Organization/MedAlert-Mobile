@@ -11,7 +11,7 @@ import { ActivityIndicator } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { getJwtSubIfNotExpired } from "@/utils/jwt";
 
-const TOKEN_KEY = "medallert.token" as const;
+export const TOKEN_KEY = "medallert.token" as const;
 
 type User = { id: string };
 type LoginCredentials = { email: string; password: string };
@@ -41,6 +41,11 @@ type AuthContexType = {
 };
 
 const AuthContext = createContext({} as AuthContexType);
+
+export async function getToken(): Promise<string | null> {
+  const token = await SecureStore.getItemAsync(TOKEN_KEY);
+  return token;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
