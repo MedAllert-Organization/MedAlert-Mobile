@@ -3,19 +3,29 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../constants/Colors";
 import InitialMedicineComponent from "@/components/progress-visualization/medicine-card";
+import ProgressSummary from "@/components/progress-visualization/medicine-progress";
 
 export default function ProgressVisualization() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
   const medicines = [
-  { name: "Omeprasol", dosage: "10mg - 2x ao dia", percentage: "50" },
-  { name: "Paracetamol", dosage: "5mg - 1x ao dia", percentage: "20" },
-  { name: "Dipirona", dosage: "15mg - 3x ao dia", percentage: "80" },
-  { name: "Ibuprofeno", dosage: "200mg - 2x ao dia", percentage: "60" },
-  { name: "Amoxicilina", dosage: "500mg - 3x ao dia", percentage: "70" },
-  { name: "Lorazepam", dosage: "1mg - 1x ao dia", percentage: "30" },
-];
+    { name: "Omeprasol", dosage: "10mg - 2x ao dia", percentage: "50" },
+    { name: "Paracetamol", dosage: "5mg - 1x ao dia", percentage: "20" },
+    { name: "Dipirona", dosage: "15mg - 3x ao dia", percentage: "80" },
+    { name: "Ibuprofeno", dosage: "200mg - 2x ao dia", percentage: "60" },
+    { name: "Amoxicilina", dosage: "500mg - 3x ao dia", percentage: "70" },
+    { name: "Lorazepam", dosage: "1mg - 1x ao dia", percentage: "30" },
+  ];
+
+let average = 0;
+
+for (let i = 0; i < medicines.length; i++) {
+  let num = parseInt(medicines[i].percentage, 10);
+  average += num;
+}
+
+average = average / medicines.length;
 
   return (
     <View style={{ flex: 1 }}>
@@ -29,20 +39,22 @@ export default function ProgressVisualization() {
       >
         <SafeAreaView style={{ flex: 1, justifyContent: "flex-start", alignItems: "center" }}>
           <ScrollView>
-            <Text style={[styles.titleMain, 
-            {color:theme.tint,
+            <Text style={[styles.titleMain,
+            {
+              color: theme.tint,
               textShadowColor: 'black',
-              textShadowOffset: {width: -1, height: 1}
+              textShadowOffset: { width: -1, height: 1 }
             }]}>Progresso</Text>
 
-            <Text style={[styles.titleSubtitle, 
+            <Text style={[styles.titleSubtitle,
             {
               textShadowColor: 'black',
-              textShadowOffset: {width: -1, height: 1}
+              textShadowOffset: { width: -1, height: 1 }
             }]}>Acompanhe seus medicamentos</Text>
 
             <View style={[styles.medicineCardContainer]}>
               <InitialMedicineComponent medicines={medicines} />
+              <ProgressSummary average={average} />
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -52,14 +64,14 @@ export default function ProgressVisualization() {
 }
 
 const styles = StyleSheet.create({
-  titleMain:{
+  titleMain: {
     fontSize: 30,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 5,
   },
 
-  titleSubtitle:{
+  titleSubtitle: {
     color: 'white',
     fontSize: 20,
     fontWeight: "bold",
@@ -67,8 +79,9 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 
-  medicineCardContainer:{
+  medicineCardContainer: {
     justifyContent: "center",
-    marginTop: 20
+    marginTop: 20,
+    paddingHorizontal: 16,
   }
 })

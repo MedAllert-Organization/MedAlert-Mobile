@@ -12,7 +12,7 @@ const getProgressColor = (percentage: number) => {
   return '#1e3a8a'; 
 };
 
-export default function InitialProgressCircleComponent({ percentage }: Props) {
+export default function ProgressCircleComponent({ percentage }: Props) {
   const size = 60;
   const strokeWidth = 6;
   const radius = (size - strokeWidth) / 2;

@@ -12,7 +12,7 @@ type Props = {
     medicines: Medicine[];
 };
 
-export default function InitialMedicineComponent({ medicines }: Props) {
+export default function MedicineComponent({ medicines }: Props) {
   return (
     <View>
       {medicines.map((medicine, index) => {
