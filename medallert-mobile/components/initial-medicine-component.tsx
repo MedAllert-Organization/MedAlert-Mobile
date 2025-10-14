@@ -9,13 +9,21 @@ import {
   View,
 } from "react-native";
 
-type Medicine = {
+export type Medication = {
+  medicationId: string;
+  userId: string;
+  treatmentId: string | null;
   name: string;
-  time: string;
+  dose: string | null;
+  description: string | null;
+  visualTypeId: string | null;
+  soundTypeId: string | null;
+  alertPeriodInHours: number;
+  endTreatmentAt: Date | null;
 };
 
 type Props = {
-  medicines: Medicine[];
+  medicines: Medication[];
 };
 
 export default function InitialMedicineComponent({ medicines }: Props) {
@@ -25,32 +33,51 @@ export default function InitialMedicineComponent({ medicines }: Props) {
   return (
     <View>
       <Text style={[styles.sectionTitle, { color: theme.text }]}>
-        Today's Medicine
+        Today's Medicines
       </Text>
-      <View style={[localStyles.card, { backgroundColor: theme.background }]}>
-        {medicines.map((med, idx) => (
-          <View
-            key={med.name}
-            style={[
-              localStyles.row,
-              {
-                borderBottomWidth: idx !== medicines.length - 1 ? 0.2 : 0,
-                borderBottomColor: theme.text,
-                paddingVertical: 3,
-              },
-            ]}
-          >
-            <Text style={{ color: theme.text, fontWeight: "500" }}>
-              {med.name}
-            </Text>
-            <Text style={{ color: theme.text, marginTop: 4 }}>{med.time}</Text>
-          </View>
-        ))}
-      </View>
+
+      {medicines.length === 0 ? (
+        <View style={[localStyles.card, { backgroundColor: theme.background }]}>
+          <Text style={{ color: theme.text, textAlign: "center" }}>
+            No medications scheduled for today.
+          </Text>
+        </View>
+      ) : (
+        <View style={[localStyles.card, { backgroundColor: theme.background }]}>
+          {medicines.map((med, idx) => (
+            <View
+              key={med.medicationId}
+              style={[
+                localStyles.row,
+                {
+                  borderBottomWidth: idx !== medicines.length - 1 ? 0.2 : 0,
+                  borderBottomColor: theme.text,
+                  paddingVertical: 6,
+                },
+              ]}
+            >
+              <View>
+                <Text style={{ color: theme.text, fontWeight: "600" }}>
+                  {med.name}
+                </Text>
+                {med.dose && (
+                  <Text style={{ color: theme.text, opacity: 0.7 }}>
+                    Dose: {med.dose}
+                  </Text>
+                )}
+              </View>
+
+              <Text style={{ color: theme.text, opacity: 0.7 }}>
+                Every {med.alertPeriodInHours}h
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <TouchableOpacity onPress={() => router.push("/medication")}>
         <View style={[localStyles.card, { backgroundColor: theme.background }]}>
-          <Text style={{ color: theme.text }}>+ Add med</Text>
+          <Text style={{ color: theme.text, textAlign: "center" }}>+ Add med</Text>
         </View>
       </TouchableOpacity>
     </View>
@@ -58,7 +85,6 @@ export default function InitialMedicineComponent({ medicines }: Props) {
 }
 
 const localStyles = StyleSheet.create({
-  button: {},
   card: {
     borderRadius: 12,
     padding: 12,
@@ -75,5 +101,4 @@ const localStyles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  subTitle: { fontSize: 16, marginBottom: 8 },
 });

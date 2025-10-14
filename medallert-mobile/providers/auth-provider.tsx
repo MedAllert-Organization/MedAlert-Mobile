@@ -10,6 +10,7 @@ import {
 import { ActivityIndicator } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { getJwtSubIfNotExpired } from "@/utils/jwt";
+import env from "@/config/env";
 
 export const TOKEN_KEY = "medallert.token" as const;
 
@@ -27,6 +28,7 @@ type ChangePasswordCredentials = ConfirmAccountCredentials & {
 
 type AuthContexType = {
   user: User | null;
+  token: string | null;
   isLoading: boolean;
   isLoggedIn: boolean;
   isReady: boolean;
@@ -43,29 +45,32 @@ type AuthContexType = {
 const AuthContext = createContext({} as AuthContexType);
 
 export async function getToken(): Promise<string | null> {
-  const token = await SecureStore.getItemAsync(TOKEN_KEY);
-  return token;
+  return await SecureStore.getItemAsync(TOKEN_KEY);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
-  const isLoggedIn = user !== null;
+  const isLoggedIn = !!user;
 
   useEffect(() => {
     let mounted = true;
 
     (async () => {
       try {
-        const token = await SecureStore.getItemAsync(TOKEN_KEY);
+        const storedToken = await SecureStore.getItemAsync(TOKEN_KEY);
         if (!mounted) return;
 
-        if (token) {
-          const id = getJwtSubIfNotExpired(token);
-          if (id && mounted) {
+        if (storedToken) {
+          const id = getJwtSubIfNotExpired(storedToken);
+          if (id) {
             setUser({ id });
+            setToken(storedToken);
+          } else {
+            await SecureStore.deleteItemAsync(TOKEN_KEY);
           }
         }
       } finally {
@@ -78,39 +83,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const login = useCallback(async (login: LoginCredentials): Promise<void> => {
+  const login = useCallback(async (credentials: LoginCredentials) => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:3000/auth/login", {
+      const res = await fetch(`${env.BASE_URL}/auth/login`, {
         method: "POST",
-        body: JSON.stringify(login),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
       });
+
       if (!res.ok) {
-        throw "Failed login";
+        throw new Error("Failed to login");
       }
 
-      const { token }: { token: string } = await res.json();
+      const { token } = await res.json();
+      const id = getJwtSubIfNotExpired(token);
 
-      setUser({ id: token });
-      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      if (id) {
+        setUser({ id });
+        setToken(token);
+        await SecureStore.setItemAsync(TOKEN_KEY, token);
+      }
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   const createAccount = useCallback(
-    async (createAccount: CreateAccountCredentials): Promise<void> => {
+    async (credentials: CreateAccountCredentials) => {
       setIsLoading(true);
       try {
-        const res = await fetch("http://127.0.0.1:3000/auth/register", {
+        const res = await fetch(`${env.BASE_URL}/auth/register`, {
           method: "POST",
-          body: JSON.stringify(createAccount),
           headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(credentials),
         });
-        if (!res.ok) {
-          throw "Failed to create account";
-        }
+        if (!res.ok) throw new Error("Failed to create account");
       } finally {
         setIsLoading(false);
       }
@@ -119,17 +127,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const confirmAccount = useCallback(
-    async (confirm: ConfirmAccountCredentials): Promise<void> => {
+    async (credentials: ConfirmAccountCredentials) => {
       setIsLoading(true);
       try {
-        const res = await fetch("http://127.0.0.1:3000/auth/confirm-account", {
+        const res = await fetch(`${env.BASE_URL}/auth/confirm-account`, {
           method: "POST",
-          body: JSON.stringify(confirm),
           headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(credentials),
         });
-        if (!res.ok) {
-          throw "Failed to confirm account";
-        }
+        if (!res.ok) throw new Error("Failed to confirm account");
       } finally {
         setIsLoading(false);
       }
@@ -138,17 +144,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const sendPasswordRecoveryCode = useCallback(
-    async (recovery: SendPasswordRecoveryCodeCredentials): Promise<void> => {
+    async (credentials: SendPasswordRecoveryCodeCredentials) => {
       setIsLoading(true);
       try {
-        const res = await fetch("http://127.0.0.1:3000/auth/recover-password", {
+        const res = await fetch(`${env.BASE_URL}/auth/recover-password`, {
           method: "POST",
-          body: JSON.stringify(recovery),
           headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(credentials),
         });
-        if (!res.ok) {
-          throw "Failed to recover account";
-        }
+        if (!res.ok) throw new Error("Failed to send recovery code");
       } finally {
         setIsLoading(false);
       }
@@ -157,17 +161,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const changePassword = useCallback(
-    async (changeCredentials: ChangePasswordCredentials): Promise<void> => {
+    async (credentials: ChangePasswordCredentials) => {
       setIsLoading(true);
       try {
-        const res = await fetch("http://127.0.0.1:3000/auth/change-password", {
+        const res = await fetch(`${env.BASE_URL}/auth/change-password`, {
           method: "POST",
-          body: JSON.stringify(changeCredentials),
           headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(credentials),
         });
-        if (!res.ok) {
-          throw "Failed to change password";
-        }
+        if (!res.ok) throw new Error("Failed to change password");
       } finally {
         setIsLoading(false);
       }
@@ -175,8 +177,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const logout = useCallback(async (): Promise<void> => {
+  const logout = useCallback(async () => {
     setUser(null);
+    setToken(null);
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     router.replace("/login");
   }, [router]);
@@ -186,7 +189,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user: null,
+        user,
+        token,
         isLoading,
         isLoggedIn,
         isReady,

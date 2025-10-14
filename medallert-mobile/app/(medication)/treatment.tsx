@@ -11,6 +11,7 @@ import { getToken } from "@/providers/auth-provider";
 import LinkText from "@/components/LinkText";
 import { router } from "expo-router";
 import { BackButton } from "@/components/BackButton";
+import env from "@/config/env";
 
 export type TreatmentRequest = {
   success: boolean;
@@ -68,7 +69,7 @@ export default function TreatmentsScreen() {
   const getTreatments = useCallback(async (): Promise<void> => {
     try {
       const token = await getToken();
-      const res = await fetch("http://127.0.0.1:3000/medication/treatment", {
+      const res = await fetch(`${env.BASE_URL}/medication/treatment`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -91,7 +92,7 @@ export default function TreatmentsScreen() {
       try {
         const token = await getToken();
         const res = await fetch(
-          `http://127.0.0.1:3000/medication/treatment/${id}`,
+          `${env.BASE_URL}/medication/treatment/${id}`,
           {
             method: "delete",
             headers: {
@@ -116,7 +117,7 @@ export default function TreatmentsScreen() {
     async (payload: CreateTreatment): Promise<void> => {
       try {
         const token = await getToken();
-        const res = await fetch("http://127.0.0.1:3000/medication/treatment", {
+        const res = await fetch(`${env.BASE_URL}/medication/treatment`, {
           method: "post",
           headers: {
             "Content-Type": "application/json",

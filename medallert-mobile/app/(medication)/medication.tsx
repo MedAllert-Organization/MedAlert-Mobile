@@ -12,6 +12,7 @@ import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../../utils/remedyStyles";
+import env from "@/config/env";
 
 export type MedicationsRequest = {
   success: boolean;
@@ -68,7 +69,7 @@ export default function MedicationScreen() {
   const getMedications = useCallback(async (): Promise<void> => {
     try {
       const token = await getToken();
-      const res = await fetch("http://127.0.0.1:3000/medication/medication", {
+      const res = await fetch(`${env.BASE_URL}/medication/medication`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -101,7 +102,7 @@ export default function MedicationScreen() {
     ): Promise<void> => {
       try {
         const token = await getToken();
-        const res = await fetch("http://127.0.0.1:3000/medication/medication", {
+        const res = await fetch(`${env.BASE_URL}/medication/medication`, {
           method: "post",
           headers: {
             "Content-Type": "application/json",
@@ -126,7 +127,7 @@ export default function MedicationScreen() {
       try {
         const token = await getToken();
         const res = await fetch(
-          `http://127.0.0.1:3000/medication/medication/${id}`,
+          `${env.BASE_URL}/medication/medication/${id}`,
           {
             method: "delete",
             headers: {

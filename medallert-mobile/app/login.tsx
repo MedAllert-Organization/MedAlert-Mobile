@@ -14,6 +14,7 @@ import TextField from "@/components/TextField";
 import Title from "@/components/Title";
 import Subtitle from "@/components/Subtitle";
 import Background from "@/components/Background";
+import env from "@/config/env";
 
 export default function Login() {
   const [email, setEmail] = useState<string>("");
@@ -28,6 +29,7 @@ export default function Login() {
       return;
     }
     try {
+      console.log(env.BASE_URL)
       await login({ email, password });
       router.push("/tabs/initial");
     } catch (e) {
