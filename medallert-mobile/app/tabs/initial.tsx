@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import InitialImportantComponent from "@/components/initial-important-allert-component";
 import InitialMedicineComponent from "@/components/initial-medicine-component";
 import Colors from "@/constants/Colors";
@@ -16,6 +16,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import env from "@/config/env";
+import { useFocusEffect } from "expo-router";
+import Background from "@/components/Background";
 
 type Medication = {
   medicationId: string;
@@ -38,55 +40,64 @@ export default function Initial() {
   const [medicines, setMedicines] = useState<Medication[]>([]);
   const [loading, setLoading] = useState(true);
 
-  
 
-useEffect(() => {
-  const fetchMedicines = async () => {
-    try {
-      const response = await fetch(`${env.BASE_URL}/medication/medication/today`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar medicamentos: ${response.status}`);
-      }
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
 
-      const data = await response.json();
+      const fetchMedicines = async () => {
+        setLoading(true);
+        try {
+          const response = await fetch(`${env.BASE_URL}/medication/medication/today`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
-      // 👇 Agora usamos o campo certo
-      if (Array.isArray(data?.medications)) {
-        setMedicines(data.medications);
-      } else {
-        console.warn("Formato inesperado da resposta:", data);
-        setMedicines([]);
-      }
-    } catch (err) {
-      console.error("Erro ao buscar medicamentos:", err);
-      setMedicines([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+          if (!response.ok) {
+            throw new Error(`Erro ao buscar medicamentos: ${response.status}`);
+          }
 
-  fetchMedicines();
-}, [token]);
+          const data = await response.json();
+
+          if (isActive) {
+            if (Array.isArray(data?.medications)) {
+              setMedicines(data.medications);
+            } else {
+              console.warn("Formato inesperado da resposta:", data);
+              setMedicines([]);
+            }
+          }
+        } catch (err) {
+          console.error("Erro ao buscar medicamentos:", err);
+          if (isActive) setMedicines([]);
+        } finally {
+          if (isActive) setLoading(false);
+        }
+      };
+
+      fetchMedicines();
+
+      return () => {
+        isActive = false;
+      };
+    }, [token])
+  );
+
 
 
 
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={[
-          "#61AEF0",
-          colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2",
-          colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2",
-        ]}
-        style={{ flex: 1 }}
-      >
-        <SafeAreaView style={{ flex: 1, padding: 15 }}>
+    <Background >
+
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color={theme.tint} />
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
           <View style={styles.header}>
             <Text style={[styles.title, { color: theme.text }]}>Summary</Text>
 
@@ -103,19 +114,12 @@ useEffect(() => {
               </TouchableOpacity>
             </View>
           </View>
+          <InitialImportantComponent />
+          <InitialMedicineComponent medicines={medicines} />
+        </ScrollView>
+        
+      )}
 
-          {loading ? (
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-              <ActivityIndicator size="large" color={theme.tint} />
-            </View>
-          ) : (
-            <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-              <InitialImportantComponent />
-              <InitialMedicineComponent medicines={medicines} />
-            </ScrollView>
-          )}
-        </SafeAreaView>
-      </LinearGradient>
-    </View>
+    </Background>
   );
 }

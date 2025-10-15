@@ -8,7 +8,15 @@ import TextField from "@/components/TextField";
 import { getToken } from "@/providers/auth-provider";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../../utils/remedyStyles";
@@ -52,18 +60,13 @@ export default function MedicationScreen() {
   const [medicationDesc, setMedicationDesc] = useState("");
   const [medicationPeriod, setMedicationPeriod] = useState(0);
   const [medicationEndDate, setMedicationEndDate] = useState<Date | null>(null);
-
   const [isMedicationDateVisible, setIsMedicationDateVisible] = useState(false);
 
-  const hideDatePicker = () => {
-    setIsMedicationDateVisible(false);
-  };
-
+  const hideDatePicker = () => setIsMedicationDateVisible(false);
   const handleMedicationEndConfirm = (date: Date) => {
     setMedicationEndDate(date);
     hideDatePicker();
   };
-
   const showMedicationEndPicker = () => setIsMedicationDateVisible(true);
 
   const getMedications = useCallback(async (): Promise<void> => {
@@ -75,47 +78,35 @@ export default function MedicationScreen() {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!res.ok) {
-        console.error("Bruh", res);
-      }
+
+      if (!res.ok) throw new Error("Erro ao buscar medicamentos");
 
       const response = (await res.json()) as MedicationsRequest;
       setMeds(response.medications);
     } catch (e) {
-      Alert.alert("Houve um erro ao buscar os medicamentos");
+      Alert.alert("Erro", "Houve um erro ao buscar os medicamentos");
       console.log(e);
     }
   }, []);
 
   const createMedication = useCallback(
-    async (
-      payload: CreateMedication = {
-        name: "RN Med Test",
-        dose: "dose test",
-        description: "desc",
-        alertPeriodInHours: 12,
-        treatmentId: null,
-        visualTypeId: null,
-        soundTypeId: null,
-        endTreatmentAt: null,
-      },
-    ): Promise<void> => {
+    async (payload: CreateMedication): Promise<void> => {
       try {
         const token = await getToken();
         const res = await fetch(`${env.BASE_URL}/medication/medication`, {
-          method: "post",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(payload),
         });
-        if (!res.ok) {
-          console.error(res);
-        }
+
+        if (!res.ok) throw new Error("Erro ao criar medicamento");
+
         await getMedications();
       } catch (e) {
-        Alert.alert("Houve um erro ao criar o medicamento!");
+        Alert.alert("Erro", "Houve um erro ao criar o medicamento!");
         console.log(e);
       }
     },
@@ -126,22 +117,18 @@ export default function MedicationScreen() {
     async (id: string): Promise<void> => {
       try {
         const token = await getToken();
-        const res = await fetch(
-          `${env.BASE_URL}/medication/medication/${id}`,
-          {
-            method: "delete",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
+        const res = await fetch(`${env.BASE_URL}/medication/medication/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-        );
-        if (!res.ok) {
-          console.error("Bruh", res);
-        }
+        });
+
+        if (!res.ok) throw new Error("Erro ao apagar medicamento");
         await getMedications();
       } catch (e) {
-        Alert.alert("Houve um erro ao apagar o medicamento!");
+        Alert.alert("Erro", "Houve um erro ao apagar o medicamento!");
         console.log(e);
       }
     },
@@ -149,9 +136,7 @@ export default function MedicationScreen() {
   );
 
   useEffect(() => {
-    (async () => {
-      await Promise.allSettled([getMedications()]);
-    })();
+    getMedications();
   }, [getMedications]);
 
   async function handleCreateMedication() {
@@ -161,9 +146,10 @@ export default function MedicationScreen() {
       !medicationDesc ||
       medicationPeriod <= 0
     ) {
-      Alert.alert("Preencha todos os campos corretamente!");
+      Alert.alert("Atenção", "Preencha todos os campos corretamente!");
       return;
     }
+
     await createMedication({
       name: medicationName,
       dose: medicationDose,
@@ -180,71 +166,115 @@ export default function MedicationScreen() {
     setMedicationName("");
     setMedicationPeriod(0);
     setMedicationEndDate(null);
-
-    await getMedications();
   }
 
   return (
+   
     <Background>
-      <SafeAreaView style={{ flex: 1, paddingHorizontal: 20 }}>
-        <View style={{ paddingBottom: 16 }}>
-          <BackButton />
-          <Subtitle>Medicamentos</Subtitle>
+  <View>
+     <BackButton />
+    </View>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+    
+            }}
+          >
+            <View style={{ paddingBottom: 20 }}>
+             
+              <Subtitle>💊 Medicamentos</Subtitle>
 
-          <Text>Nome</Text>
-          <TextField value={medicationName} onChangeText={setMedicationName} />
+              <View style={{ gap: 10, marginTop: 12 }}>
+                <Text style={styles.label}>Nome</Text>
+                <TextField
+                  value={medicationName}
+                  onChangeText={setMedicationName}
+                  placeholder="Ex: Paracetamol"
+                />
 
-          <Text>Dose</Text>
-          <TextField value={medicationDose} onChangeText={setMedicationDose} />
+                <Text style={styles.label}>Dose</Text>
+                <TextField
+                  value={medicationDose}
+                  onChangeText={setMedicationDose}
+                  placeholder="Ex: 500mg"
+                />
 
-          <Text>Descrição</Text>
-          <TextField value={medicationDesc} onChangeText={setMedicationDesc} />
+                <Text style={styles.label}>Descrição</Text>
+                <TextField
+                  value={medicationDesc}
+                  onChangeText={setMedicationDesc}
+                  placeholder="Para dor de cabeça..."
+                />
 
-          <Text>Horas (Período do medicamento)</Text>
-          <TextField
-            keyboardType="decimal-pad"
-            value={String(medicationPeriod)}
-            onChangeText={(t) => setMedicationPeriod(Number(t))}
-          />
+                <Text style={styles.label}>Intervalo (em horas)</Text>
+                <TextField
+                  keyboardType="decimal-pad"
+                  value={String(medicationPeriod)}
+                  onChangeText={(t) => setMedicationPeriod(Number(t))}
+                  placeholder="Ex: 8"
+                />
 
-          <Text>Data Limite (opcional)</Text>
-          <View style={{ paddingVertical: 12, flexDirection: "row", gap: 4 }}>
-            <TouchableOpacity onPress={showMedicationEndPicker}>
-              <Text style={{ color: "blue" }}>
-                {medicationEndDate?.toISOString() ?? "Escolha a data"}
-              </Text>
-            </TouchableOpacity>
-            <DateTimePickerModal
-              isVisible={isMedicationDateVisible}
-              mode="date"
-              onConfirm={handleMedicationEndConfirm}
-              onCancel={hideDatePicker}
-            />
-            <TouchableOpacity onPress={() => setMedicationEndDate(null)}>
-              <Text>❌</Text>
-            </TouchableOpacity>
-          </View>
+                <Text style={styles.label}>Data limite (opcional)</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <TouchableOpacity
+                    onPress={showMedicationEndPicker}
+                    style={{
+                      backgroundColor: "#e8f0fe",
+                      padding: 8,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <Text style={{ color: "#1a73e8" }}>
+                      {medicationEndDate
+                        ? medicationEndDate.toLocaleDateString()
+                        : "Escolher data"}
+                    </Text>
+                  </TouchableOpacity>
+                  {medicationEndDate && (
+                    <TouchableOpacity onPress={() => setMedicationEndDate(null)}>
+                      <Text style={{ fontSize: 18 }}>❌</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
 
-          <ButtonPrimary
-            onPress={handleCreateMedication}
-            title="Criar Medicamento"
-          />
-        </View>
-        <FlatList
-          data={meds}
-          keyExtractor={(item) => item.medicationId}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <MedicationItem
-              onPress={() => deleteMedication(item.medicationId)}
-              name={item.name}
-            />
-          )}
-        />
-        <LinkText onPress={() => router.push("/treatment")}>
-          Ver Tratamentos
-        </LinkText>
-      </SafeAreaView>
+                <DateTimePickerModal
+                  isVisible={isMedicationDateVisible}
+                  mode="date"
+                  onConfirm={handleMedicationEndConfirm}
+                  onCancel={hideDatePicker}
+                />
+
+                <ButtonPrimary
+                  onPress={handleCreateMedication}
+                  title="💾 Criar Medicamento"
+                />
+              </View>
+            </View>
+
+            <View style={{ marginTop: 16 }}>
+              <Subtitle>Lista de medicamentos</Subtitle>
+
+              {meds.length === 0 ? (
+                <Text style={{ textAlign: "center", marginTop: 12, opacity: 0.7 }}>
+                  Nenhum medicamento cadastrado ainda.
+                </Text>
+              ) : (
+                meds.map((item) => (
+                  <MedicationItem
+                    key={item.medicationId}
+                    name={item.name}
+                    onPress={() => deleteMedication(item.medicationId)}
+                  />
+                ))
+              )}
+            </View>
+
+            <View style={{ marginTop: 24 }}>
+              <LinkText onPress={() => router.push("/treatment")}>
+                ➡️ Ver Tratamentos
+              </LinkText>
+            </View>
+          </ScrollView>
     </Background>
   );
 }

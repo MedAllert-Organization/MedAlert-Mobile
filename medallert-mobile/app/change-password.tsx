@@ -38,11 +38,7 @@ export default function ChangePassword() {
 
   return (
     <Background>
-      <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
+      
           <Title>MedAllert</Title>
           <Subtitle>
             Informe o código enviado para {email ?? "o seu email"}.
@@ -81,16 +77,6 @@ export default function ChangePassword() {
           <LinkText onPress={() => router.push("/login")} disabled={isLoading}>
             Entrar na sua conta
           </LinkText>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
     </Background>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-  },
-});

@@ -104,4 +104,11 @@ export const styles = StyleSheet.create({
     color: "#9ca3af",
     marginLeft: 8,
   },
+    label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151", 
+    marginBottom: 4,
+    marginTop: 8,
+  },
 });

@@ -39,12 +39,8 @@ export default function Login() {
   };
 
   return (
-    <Background>
-      <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
+    <Background style={styles.container}>
+ 
           <Title>MedAllert</Title>
           <Subtitle>Bem-vindo! Faça login para continuar.</Subtitle>
 
@@ -85,16 +81,12 @@ export default function Login() {
           >
             Esqueceu a sua senha?
           </LinkText>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
     </Background>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 20,
     justifyContent: "center",
   },
 });

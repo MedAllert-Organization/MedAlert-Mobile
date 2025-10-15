@@ -52,7 +52,7 @@ export default function InitialMedicineComponent({ medicines }: Props) {
                 {
                   borderBottomWidth: idx !== medicines.length - 1 ? 0.2 : 0,
                   borderBottomColor: theme.text,
-                  paddingVertical: 6,
+               
                 },
               ]}
             >

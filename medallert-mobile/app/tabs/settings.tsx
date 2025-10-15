@@ -2,19 +2,15 @@ import { useColorScheme, ScrollView, Text, View, TouchableOpacity, Switch, Style
 import { LinearGradient } from "expo-linear-gradient";
 
 import Colors from "@/constants/Colors";
+import Background from "@/components/Background";
 
 export default function Settings() {
     const colorScheme = useColorScheme();
     const theme = Colors[colorScheme ?? "light"];
 
     return (
-        <View style={{ flex: 1 }}>
-            <LinearGradient
-                colors={["#61AEF0", colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2", colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2"]}
-                style={{ flex: 1 }}
-                >
-
-            </LinearGradient>
-        </View>
+           <Background>
+            <Text>Configurações</Text>
+            </Background>
     );
 }
