@@ -1,77 +1,112 @@
-import React from "react";
-import { Text, View, StyleSheet, ScrollView, Pressable, TouchableOpacity } from "react-native";
-import { useColorScheme } from "react-native";
 import Colors from "@/constants/Colors";
 import styles from "@/utils/styles";
+import { router } from "expo-router";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
 
-type Medicine = {
-    name: string;
-    time: string;
+type Medication = {
+  medicationId: string;
+  userId: string;
+  treatmentId: string | null;
+  name: string;
+  dose: string | null;
+  description: string | null;
+  visualTypeId: string | null;
+  soundTypeId: string | null;
+  alertPeriodInHours: number;
+  endTreatmentAt: Date | null;
 };
 
 type Props = {
-    medicines: Medicine[];
+  medicines: Medication[];
 };
 
 export default function InitialMedicineComponent({ medicines }: Props) {
-    const colorScheme = useColorScheme();
-    const theme = Colors[colorScheme ?? "light"];
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
 
-    return (
-        <View>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Today's Medicine</Text>
-            <View style={[localStyles.card, { backgroundColor: theme.background }]}>
-                {
-                    medicines.map((med, idx) => (
-                        <View
-                            key={idx}
-                            style={[
-                                localStyles.row,
-                                {
-                                    borderBottomWidth: idx !== medicines.length - 1 ? 0.2 : 0,
-                                    borderBottomColor: theme.text,
-                                    paddingVertical: 3,
-                                },
-                            ]}
-                        >
+  function handlePress(medId: string) {
+    router.push({
+      pathname: "/medication-detail",
+      params: { id: medId },
+    });
+  }
 
-                            <Text style={{ color: theme.text, fontWeight: "500" }}>{med.name}</Text>
-                            <Text style={{ color: theme.text, marginTop: 4 }}>{med.time}</Text>
-                        </View>
-                    ))
-                }
-            </View>
+  return (
+    <View>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>
+        Today's Medicines
+      </Text>
 
-            <TouchableOpacity  onPress={(() => null)}>
-                <View style={[localStyles.card, { backgroundColor: theme.background }]}>
-                    <Text style={{color:theme.text}}>+ Add med</Text>
-                </View>
-            </TouchableOpacity>
-
-
+      {medicines.length === 0 ? (
+        <View style={[localStyles.card, { backgroundColor: theme.background }]}>
+          <Text style={{ color: theme.text, textAlign: "center" }}>
+            No medications scheduled for today.
+          </Text>
         </View>
-    );
+      ) : (
+        <View style={[localStyles.card, { backgroundColor: theme.background }]}>
+          {medicines.map((med, idx) => (
+            <TouchableOpacity
+              key={med.medicationId}
+              onPress={() => handlePress(med.medicationId)}
+              style={[
+                localStyles.row,
+                {
+                  borderBottomWidth: idx !== medicines.length - 1 ? 0.2 : 0,
+                  borderBottomColor: theme.text,
+                },
+              ]}
+            >
+              <View>
+                <Text style={{ color: theme.text, fontWeight: "600" }}>
+                  {med.name}
+                </Text>
+                {med.dose && (
+                  <Text style={{ color: theme.text, opacity: 0.7 }}>
+                    Dose: {med.dose}
+                  </Text>
+                )}
+              </View>
+
+              <Text style={{ color: theme.text, opacity: 0.7 }}>
+                Every {med.alertPeriodInHours}h
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      <TouchableOpacity onPress={() => router.push("/medication")}>
+        <View style={[localStyles.card, { backgroundColor: theme.background }]}>
+          <Text style={{ color: theme.text, textAlign: "center" }}>+ Add med</Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const localStyles = StyleSheet.create({
-    button: {
-
-    },
-    card: {
-        borderRadius: 12,
-        padding: 12,
-        marginBottom: 12,
-        backgroundColor: "#fff",
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    row: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    subTitle: { fontSize: 16, marginBottom: 8 },
+  card: {
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
 });

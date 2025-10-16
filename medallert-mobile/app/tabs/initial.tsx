@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from "react";
 import InitialImportantComponent from "@/components/initial-important-allert-component";
 import InitialMedicineComponent from "@/components/initial-medicine-component";
 import Colors from "@/constants/Colors";
@@ -10,33 +11,92 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
+  ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import env from "@/config/env";
+import { useFocusEffect } from "expo-router";
+import Background from "@/components/Background";
+
+export type Medication = {
+  medicationId: string;
+  userId: string;
+  treatmentId: string | null;
+  name: string;
+  dose: string | null;
+  description: string | null;
+  visualTypeId: string | null;
+  soundTypeId: string | null;
+  alertPeriodInHours: number;
+  endTreatmentAt: Date | null;
+};
 
 export default function Initial() {
-  const { logout } = useAuth();
+  const { logout, token } = useAuth();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const medicines = [
-    { name: "Omeprasol", time: "09:35" },
-    { name: "Paracetamol", time: "13:22" },
-    { name: "Dipirona", time: "13:22" },
-    { name: "Complexo B", time: "19:22" },
-  ];
+  const [medicines, setMedicines] = useState<Medication[]>([]);
+  const [loading, setLoading] = useState(true);
+
+
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const fetchMedicines = async () => {
+        setLoading(true);
+        try {
+          const response = await fetch(`${env.BASE_URL}/medication/medication/today`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Erro ao buscar medicamentos: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (isActive) {
+            if (Array.isArray(data?.medications)) {
+              setMedicines(data.medications);
+            } else {
+              console.warn("Formato inesperado da resposta:", data);
+              setMedicines([]);
+            }
+          }
+        } catch (err) {
+          console.error("Erro ao buscar medicamentos:", err);
+          if (isActive) setMedicines([]);
+        } finally {
+          if (isActive) setLoading(false);
+        }
+      };
+
+      fetchMedicines();
+
+      return () => {
+        isActive = false;
+      };
+    }, [token])
+  );
+
+
+
 
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={[
-          "#61AEF0",
-          colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2",
-          colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2",
-        ]}
-        style={{ flex: 1 }}
-      >
-        <SafeAreaView style={{ flex: 1, padding: 15 }}>
+    <Background >
+
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color={theme.tint} />
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
           <View style={styles.header}>
             <Text style={[styles.title, { color: theme.text }]}>Summary</Text>
 
@@ -45,18 +105,19 @@ export default function Initial() {
             >
               <View style={styles.avatar} />
               <TouchableOpacity onPress={() => logout()}>
-                <MaterialCommunityIcons name="logout" size={24} color="black" />
+                <MaterialCommunityIcons
+                  name="logout"
+                  size={24}
+                  color={theme.text}
+                />
               </TouchableOpacity>
             </View>
           </View>
+          <InitialMedicineComponent medicines={medicines} />
+        </ScrollView>
+        
+      )}
 
-          <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-            <InitialImportantComponent />
-
-            <InitialMedicineComponent medicines={medicines} />
-          </ScrollView>
-        </SafeAreaView>
-      </LinearGradient>
-    </View>
+    </Background>
   );
 }

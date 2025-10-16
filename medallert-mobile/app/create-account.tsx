@@ -56,11 +56,7 @@ export default function CreateAccount() {
 
   return (
     <Background>
-      <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
+
           <Title>MedAllert</Title>
           <Subtitle>Crie sua conta</Subtitle>
 
@@ -119,16 +115,7 @@ export default function CreateAccount() {
           <LinkText onPress={() => router.push("/login")} disabled={isLoading}>
             Já possui uma conta?
           </LinkText>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+    
     </Background>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-  },
-});

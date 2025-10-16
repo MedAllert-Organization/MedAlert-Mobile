@@ -27,7 +27,7 @@ export default function Background({
         colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2",
         colorScheme === "dark" ? "#1a1a1a" : "#f2f2f2",
       ]}
-      style={[{ flex: 1 }, style]}
+      style={[{ flex: 1, padding: 20}, style]}
     >
       <SafeAreaView style={{ flex: 1 }}>
         <KeyboardAvoidingView

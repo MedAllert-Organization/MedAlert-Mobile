@@ -14,6 +14,7 @@ import TextField from "@/components/TextField";
 import Title from "@/components/Title";
 import Subtitle from "@/components/Subtitle";
 import Background from "@/components/Background";
+import env from "@/config/env";
 
 export default function Login() {
   const [email, setEmail] = useState<string>("");
@@ -28,6 +29,7 @@ export default function Login() {
       return;
     }
     try {
+      console.log(env.BASE_URL)
       await login({ email, password });
       router.push("/tabs/initial");
     } catch (e) {
@@ -37,12 +39,8 @@ export default function Login() {
   };
 
   return (
-    <Background>
-      <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
+    <Background style={styles.container}>
+ 
           <Title>MedAllert</Title>
           <Subtitle>Bem-vindo! Faça login para continuar.</Subtitle>
 
@@ -83,16 +81,12 @@ export default function Login() {
           >
             Esqueceu a sua senha?
           </LinkText>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
     </Background>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 20,
     justifyContent: "center",
   },
 });
