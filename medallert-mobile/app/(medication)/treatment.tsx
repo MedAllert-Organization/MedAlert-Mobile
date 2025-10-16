@@ -18,15 +18,7 @@ import LinkText from "@/components/LinkText";
 import { router } from "expo-router";
 import { BackButton } from "@/components/BackButton";
 import env from "@/config/env";
-
-export type Medication = {
-  medicationId: string;
-  name: string;
-  description: string | null;
-  alertPeriodInHours: number;
-  dose: string | null;
-  createdAt: string;
-};
+import { Medication } from "./medication";
 
 export type MedicationsRequest = {
   success: boolean;

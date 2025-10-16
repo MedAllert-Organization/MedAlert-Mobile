@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 
-export type Medication = {
+type Medication = {
   medicationId: string;
   userId: string;
   treatmentId: string | null;
@@ -30,6 +30,13 @@ export default function InitialMedicineComponent({ medicines }: Props) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
+  function handlePress(medId: string) {
+    router.push({
+      pathname: "/medication-detail",
+      params: { id: medId },
+    });
+  }
+
   return (
     <View>
       <Text style={[styles.sectionTitle, { color: theme.text }]}>
@@ -45,14 +52,14 @@ export default function InitialMedicineComponent({ medicines }: Props) {
       ) : (
         <View style={[localStyles.card, { backgroundColor: theme.background }]}>
           {medicines.map((med, idx) => (
-            <View
+            <TouchableOpacity
               key={med.medicationId}
+              onPress={() => handlePress(med.medicationId)}
               style={[
                 localStyles.row,
                 {
                   borderBottomWidth: idx !== medicines.length - 1 ? 0.2 : 0,
                   borderBottomColor: theme.text,
-               
                 },
               ]}
             >
@@ -70,7 +77,7 @@ export default function InitialMedicineComponent({ medicines }: Props) {
               <Text style={{ color: theme.text, opacity: 0.7 }}>
                 Every {med.alertPeriodInHours}h
               </Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       )}
@@ -100,5 +107,6 @@ const localStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingVertical: 8,
   },
 });

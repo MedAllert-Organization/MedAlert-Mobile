@@ -13,13 +13,12 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import env from "@/config/env";
 import { useFocusEffect } from "expo-router";
 import Background from "@/components/Background";
 
-type Medication = {
+export type Medication = {
   medicationId: string;
   userId: string;
   treatmentId: string | null;
@@ -114,7 +113,6 @@ export default function Initial() {
               </TouchableOpacity>
             </View>
           </View>
-          <InitialImportantComponent />
           <InitialMedicineComponent medicines={medicines} />
         </ScrollView>
         
