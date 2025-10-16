@@ -38,13 +38,7 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
-<<<<<<< HEAD
-    "jose": "6.1.0",
-    "expo-print": "~14.1.4",
-    "expo-sharing": "~13.1.5"
-=======
     "react-native-web": "~0.20.0"
->>>>>>> dev
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
