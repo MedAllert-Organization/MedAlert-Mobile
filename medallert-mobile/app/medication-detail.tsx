@@ -7,7 +7,7 @@ import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
 import Background from "@/components/Background";
 import { BackButton } from "@/components/BackButton";
-import { Medication } from "./(medication)/medication";
+import { Medication } from "./(medication)/create-medication";
 
 export default function MedicineDetail() {
   const colorScheme = useColorScheme();

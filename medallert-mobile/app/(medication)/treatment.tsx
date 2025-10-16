@@ -18,7 +18,8 @@ import LinkText from "@/components/LinkText";
 import { router } from "expo-router";
 import { BackButton } from "@/components/BackButton";
 import env from "@/config/env";
-import { Medication } from "./medication";
+import { Medication } from "./create-medication";
+import { scheduleMedicationReminder } from "@/utils/notifications";
 
 export type MedicationsRequest = {
   success: boolean;
@@ -155,26 +156,33 @@ export default function TreatmentsScreen() {
     );
   }
 
-  async function handleAddTreatment() {
-    if (!newTreatmentName || !newTreatmentDesc || selectedMedications.length === 0) {
-      Alert.alert("Atenção", "Preencha todos os campos e selecione ao menos um medicamento!");
-      return;
-    }
-
-    await createTreatment({
-      name: newTreatmentName,
-      description: newTreatmentDesc,
-      startAt: treatmentDate,
-      endAt: treatmentEndDate,
-      medicationIds: selectedMedications,
-    });
-
-    setNewTreatmentName("");
-    setNewTreatmentDesc("");
-    setTreatmentDate(new Date());
-    setTreatmentEndDate(null);
-    setSelectedMedications([]);
+async function handleAddTreatment() {
+  if (!newTreatmentName || !newTreatmentDesc || selectedMedications.length === 0) {
+    Alert.alert("Atenção", "Preencha todos os campos e selecione ao menos um medicamento!");
+    return;
   }
+
+  await createTreatment({
+    name: newTreatmentName,
+    description: newTreatmentDesc,
+    startAt: treatmentDate,
+    endAt: treatmentEndDate,
+    medicationIds: selectedMedications,
+  });
+
+  // 🔔 agenda lembretes para cada medicação selecionada
+  meds
+    .filter((m) => selectedMedications.includes(m.medicationId))
+    .forEach((m) =>
+      scheduleMedicationReminder(m.name, m.alertPeriodInHours),
+    );
+
+  setNewTreatmentName("");
+  setNewTreatmentDesc("");
+  setTreatmentDate(new Date());
+  setTreatmentEndDate(null);
+  setSelectedMedications([]);
+}
 
   return (
     <Background>
@@ -324,7 +332,7 @@ export default function TreatmentsScreen() {
           </View>
 
           <View style={{ marginTop: 24, marginBottom: 40 }}>
-            <LinkText onPress={() => router.push("/medication")}>
+            <LinkText onPress={() => router.push("/create-medication")}>
               ➡️ Ver medicamentos
             </LinkText>
           </View>

@@ -53,7 +53,7 @@ type CreateMedication = {
   endTreatmentAt: Date | null;
 };
 
-export default function MedicationScreen() {
+export default function CreateMedication() {
   const [meds, setMeds] = useState<Medication[]>([]);
   const [medicationName, setMedicationName] = useState("");
   const [medicationDose, setMedicationDose] = useState("");

@@ -22,6 +22,16 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
+      name="medication"
+      options={{
+        title: "Medications",
+        tabBarIcon: ({ color }) => (
+          <FontAwesome size={28} name="medkit" color={color} />
+        ),
+      }}
+      />
+
+      <Tabs.Screen
         name="settings"
         options={{
           title: "Settings",

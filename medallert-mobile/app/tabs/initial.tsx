@@ -1,10 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import InitialImportantComponent from "@/components/initial-important-allert-component";
-import InitialMedicineComponent from "@/components/initial-medicine-component";
+import { useCallback, useState } from "react";
 import Colors from "@/constants/Colors";
 import { useAuth } from "@/providers/auth-provider";
 import styles from "@/utils/styles";
-import { LinearGradient } from "expo-linear-gradient";
 import {
   ScrollView,
   Text,
@@ -12,24 +9,14 @@ import {
   useColorScheme,
   View,
   ActivityIndicator,
+  StyleSheet
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import env from "@/config/env";
 import { useFocusEffect } from "expo-router";
 import Background from "@/components/Background";
-
-export type Medication = {
-  medicationId: string;
-  userId: string;
-  treatmentId: string | null;
-  name: string;
-  dose: string | null;
-  description: string | null;
-  visualTypeId: string | null;
-  soundTypeId: string | null;
-  alertPeriodInHours: number;
-  endTreatmentAt: Date | null;
-};
+import MedicineComponent from "@/components/medicine-component";
+import { Medication } from "../(medication)/create-medication";
 
 export default function Initial() {
   const { logout, token } = useAuth();
@@ -38,8 +25,6 @@ export default function Initial() {
 
   const [medicines, setMedicines] = useState<Medication[]>([]);
   const [loading, setLoading] = useState(true);
-
-
 
   useFocusEffect(
     useCallback(() => {
@@ -62,12 +47,8 @@ export default function Initial() {
           const data = await response.json();
 
           if (isActive) {
-            if (Array.isArray(data?.medications)) {
-              setMedicines(data.medications);
-            } else {
-              console.warn("Formato inesperado da resposta:", data);
-              setMedicines([]);
-            }
+            const meds = Array.isArray(data?.medications) ? data.medications : [];
+            setMedicines(meds);
           }
         } catch (err) {
           console.error("Erro ao buscar medicamentos:", err);
@@ -78,46 +59,57 @@ export default function Initial() {
       };
 
       fetchMedicines();
-
-      return () => {
-        isActive = false;
-      };
+      return () => { isActive = false; };
     }, [token])
   );
 
-
-
-
   return (
-    <Background >
-
+    <Background>
       {loading ? (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View style={localStyles.center}>
           <ActivityIndicator size="large" color={theme.tint} />
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
           <View style={styles.header}>
             <Text style={[styles.title, { color: theme.text }]}>Summary</Text>
-
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-            >
-              <View style={styles.avatar} />
-              <TouchableOpacity onPress={() => logout()}>
-                <MaterialCommunityIcons
-                  name="logout"
-                  size={24}
-                  color={theme.text}
-                />
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <TouchableOpacity onPress={logout}>
+                <MaterialCommunityIcons name="logout" size={24} color={theme.text} />
               </TouchableOpacity>
             </View>
           </View>
-          <InitialMedicineComponent medicines={medicines} />
-        </ScrollView>
-        
-      )}
 
+          {medicines.length === 0 ? (
+            <View style={[localStyles.card, { backgroundColor: theme.background }]}>
+              <Text style={{ color: theme.text, textAlign: "center" }}>
+                No medications scheduled for today.
+              </Text>
+            </View>
+          ) : (
+            <MedicineComponent medicines={medicines} title="Today's Medicines" />
+          )}
+        </ScrollView>
+      )}
     </Background>
   );
 }
+
+const localStyles = StyleSheet.create({
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  card: {
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+  },
+});
