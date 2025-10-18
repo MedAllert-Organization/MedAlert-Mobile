@@ -3,11 +3,8 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
-  KeyboardAvoidingView,
-  Platform,
   StyleSheet,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import LinkText from "@/components/LinkText";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import TextField from "@/components/TextField";

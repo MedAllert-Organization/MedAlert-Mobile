@@ -35,6 +35,7 @@ export type Treatment = {
   endAt: string | null;
   createdAt: string;
   updatedAt: string;
+  medications?: Medication[]
 };
 
 export type TreatmentRequest = {
@@ -332,7 +333,7 @@ async function handleAddTreatment() {
           </View>
 
           <View style={{ marginTop: 24, marginBottom: 40 }}>
-            <LinkText onPress={() => router.push("/create-medication")}>
+            <LinkText onPress={() => router.push("/tabs/medication")}>
               ➡️ Ver medicamentos
             </LinkText>
           </View>

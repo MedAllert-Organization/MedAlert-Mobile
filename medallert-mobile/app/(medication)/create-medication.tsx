@@ -37,7 +37,6 @@ export type Medication = {
   visualTypeId: string | null;
   soundTypeId: string | null;
   alertPeriodInHours: number;
-  endTreatmentAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -214,29 +213,6 @@ export default function CreateMedication() {
                   placeholder="Ex: 8"
                 />
 
-                <Text style={styles.label}>Data limite (opcional)</Text>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <TouchableOpacity
-                    onPress={showMedicationEndPicker}
-                    style={{
-                      backgroundColor: "#e8f0fe",
-                      padding: 8,
-                      borderRadius: 8,
-                    }}
-                  >
-                    <Text style={{ color: "#1a73e8" }}>
-                      {medicationEndDate
-                        ? medicationEndDate.toLocaleDateString()
-                        : "Escolher data"}
-                    </Text>
-                  </TouchableOpacity>
-                  {medicationEndDate && (
-                    <TouchableOpacity onPress={() => setMedicationEndDate(null)}>
-                      <Text style={{ fontSize: 18 }}>❌</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-
                 <DateTimePickerModal
                   isVisible={isMedicationDateVisible}
                   mode="date"
@@ -270,7 +246,7 @@ export default function CreateMedication() {
             </View>
 
             <View style={{ marginTop: 24 }}>
-              <LinkText onPress={() => router.push("/treatment")}>
+              <LinkText onPress={() => router.push("/tabs/treatment")}>
                 ➡️ Ver Tratamentos
               </LinkText>
             </View>

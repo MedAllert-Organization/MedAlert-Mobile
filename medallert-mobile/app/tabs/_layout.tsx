@@ -1,4 +1,5 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { Tabs } from "expo-router";
 
 export default function TabsLayout() {
@@ -27,6 +28,16 @@ export default function TabsLayout() {
         title: "Medications",
         tabBarIcon: ({ color }) => (
           <FontAwesome size={28} name="medkit" color={color} />
+        ),
+      }}
+      />
+
+       <Tabs.Screen
+      name="treatment"
+      options={{
+        title: "Treatments",
+        tabBarIcon: ({ color }) => (
+          <FontAwesome5 name="file-medical-alt" size={24} color={color} />
         ),
       }}
       />

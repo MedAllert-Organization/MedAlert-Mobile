@@ -9,27 +9,26 @@ import {
     useColorScheme,
 } from "react-native";
 import { router, useFocusEffect } from "expo-router";
-
 import Background from "@/components/Background";
-import MedicineComponent from "@/components/medicine-component";
 import Colors from "@/constants/Colors";
 import { useAuth } from "@/providers/auth-provider";
 import styles from "@/utils/styles";
 import env from "@/config/env";
-import { Medication } from "../(medication)/create-medication";
+import { Treatment } from "../(medication)/create-treatment";
+import TreatmentComponent from "@/components/treatment-component";
 
-export default function MedicationView() {
+export default function TreatmentView() {
     const { logout, token } = useAuth();
     const colorScheme = useColorScheme();
     const theme = useMemo(() => Colors[colorScheme ?? "light"], [colorScheme]);
 
-    const [medicines, setMedicines] = useState<Medication[]>([]);
+    const [treatments, setTreatment] = useState<Treatment[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const AddMedicationButton = () => (
-        <TouchableOpacity onPress={() => router.push("/create-medication")}>
+    const AddTreatmentButton = () => (
+        <TouchableOpacity onPress={() => router.push("/create-treatment")}>
             <View style={[localStyles.card, { backgroundColor: theme.background }]}>
-                <Text style={{ color: theme.text, textAlign: "center" }}>+ Adicionar medicação</Text>
+                <Text style={{ color: theme.text, textAlign: "center" }}>+ Adicionar tratamento</Text>
             </View>
         </TouchableOpacity>
     );
@@ -38,10 +37,10 @@ export default function MedicationView() {
         useCallback(() => {
             let isActive = true;
 
-            const fetchMedicines = async () => {
+            const fetchTreatments = async () => {
                 setLoading(true);
                 try {
-                    const response = await fetch(`${env.BASE_URL}/medication/medication`, {
+                    const response = await fetch(`${env.BASE_URL}/medication/treatment`, {
                         headers: {
                             "Content-Type": "application/json",
                             Authorization: `Bearer ${token}`,
@@ -49,23 +48,23 @@ export default function MedicationView() {
                     });
 
                     if (!response.ok) {
-                        throw new Error(`Erro ao buscar medicamentos: ${response.status}`);
+                        throw new Error(`Erro ao buscar tratamentos: ${response.status}`);
                     }
 
                     const data = await response.json();
                     if (isActive) {
-                        const meds = Array.isArray(data?.medications) ? data.medications : [];
-                        setMedicines(meds);
+                        const trea = Array.isArray(data?.treatments) ? data.treatments : [];
+                        setTreatment(trea);
                     }
                 } catch (err) {
-                    console.error("Erro ao buscar medicamentos:", err);
-                    if (isActive) setMedicines([]);
+                    console.error("Erro ao buscar tratamentos:", err);
+                    if (isActive) setTreatment([]);
                 } finally {
                     if (isActive) setLoading(false);
                 }
             };
 
-            fetchMedicines();
+            fetchTreatments();
             return () => {
                 isActive = false;
             };
@@ -83,26 +82,25 @@ export default function MedicationView() {
 
                 <ScrollView contentContainerStyle={{ paddingBottom: 0 }}>
                     <View style={styles.header}>
-                        <Text style={[styles.title, { color: theme.text }]}>Medicação</Text>
+                        <Text style={[styles.title, { color: theme.text }]}>Tratamento</Text>
                     </View>
 
-                    {medicines.length === 0 ? (
+                    {treatments.length === 0 ? (
                         <>
                             <View style={[localStyles.card, { backgroundColor: theme.background }]}>
                                 <Text style={{ color: theme.text, textAlign: "center" }}>
-                                    Nenhuma medicação foi encontrada
+                                   Nenhum tratamento encontrado
                                 </Text>
 
                             </View>
-                            <AddMedicationButton />
+                            <AddTreatmentButton />
                         </>
 
                     ) : (
                         <>
-                            <MedicineComponent medicines={medicines} title="All medications" />
-                            <AddMedicationButton />
+                            <TreatmentComponent treatments={treatments} title="All treatments" />
+                            <AddTreatmentButton />
                         </>
-
                     )}
                 </ScrollView>
             )}
