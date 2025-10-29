@@ -1,6 +1,14 @@
-import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Alert } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import { useColorScheme } from "react-native";
 import Colors from "@/constants/Colors";
 import env from "@/config/env";
@@ -8,6 +16,7 @@ import { getToken } from "@/providers/auth-provider";
 import Background from "@/components/Background";
 import { BackButton } from "@/components/BackButton";
 import { Medication } from "./(medication)/create-medication";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export default function MedicineDetail() {
   const colorScheme = useColorScheme();
@@ -26,7 +35,7 @@ export default function MedicineDetail() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }); 
+        });
 
         if (!res.ok) throw new Error("Erro ao buscar medicação");
 
@@ -42,6 +51,10 @@ export default function MedicineDetail() {
 
     fetchMed();
   }, [id]);
+
+  const handleShareTap = useCallback((id: string) => {
+    router.push({ pathname: "/(medication)/share-medication", params: { id } });
+  }, []);
 
   if (loading) {
     return (
@@ -61,35 +74,43 @@ export default function MedicineDetail() {
 
   return (
     <Background>
-      <BackButton/>
-    <ScrollView
-      style={[styles.container, ]}
-      contentContainerStyle={{ padding: 16 }}
-    >
-      <Text style={[styles.title, { color: theme.text }]}>{medication.name}</Text>
-
-      {medication.dose && (
-        <Text style={[styles.subtitle, { color: theme.text }]}>
-          Dose: {medication.dose}
-        </Text>
-      )}
-
-      {medication.description && (
-        <Text style={[styles.description, { color: theme.text }]}>
-          {medication.description}
-        </Text>
-      )}
-
-      <View style={styles.infoBox}>
-        <Text style={[styles.infoText, { color: theme.text }]}>
-          Alert every {medication.alertPeriodInHours} hours
-        </Text>
-
-        <Text style={[styles.infoText, { color: theme.text }]}>
-          Created at: {new Date(medication.createdAt).toLocaleString()}
-        </Text>
+      <View style={styles.controlsContainer}>
+        <BackButton />
+        <TouchableOpacity onPress={() => handleShareTap(id)}>
+          <MaterialIcons name="mobile-screen-share" size={24} color="black" />
+        </TouchableOpacity>
       </View>
-    </ScrollView>
+
+      <ScrollView
+        style={[styles.container]}
+        contentContainerStyle={{ padding: 16 }}
+      >
+        <Text style={[styles.title, { color: theme.text }]}>
+          {medication.name}
+        </Text>
+
+        {medication.dose && (
+          <Text style={[styles.subtitle, { color: theme.text }]}>
+            Dose: {medication.dose}
+          </Text>
+        )}
+
+        {medication.description && (
+          <Text style={[styles.description, { color: theme.text }]}>
+            {medication.description}
+          </Text>
+        )}
+
+        <View style={styles.infoBox}>
+          <Text style={[styles.infoText, { color: theme.text }]}>
+            Alert every {medication.alertPeriodInHours} hours
+          </Text>
+
+          <Text style={[styles.infoText, { color: theme.text }]}>
+            Created at: {new Date(medication.createdAt).toLocaleString()}
+          </Text>
+        </View>
+      </ScrollView>
     </Background>
   );
 }
@@ -126,5 +147,10 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 14,
     marginBottom: 4,
+  },
+  controlsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 });

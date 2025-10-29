@@ -28,6 +28,7 @@ export default function TextField({
           ? (rest.autoCapitalize ?? "none")
           : rest.autoCapitalize
       }
+      autoCorrect={false}
       {...rest}
     />
   );
