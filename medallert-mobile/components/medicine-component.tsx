@@ -53,10 +53,15 @@ export default function MedicineComponent({ medicines, title }: Props) {
                 </Text>
               )}
             </View>
-
-            <Text style={{ color: theme.text, opacity: 0.7 }}>
-              Every {med.alertPeriodInHours}h
-            </Text>
+            <View>
+               <Text style={{ color: theme.text}}>
+                A cada {med.alertPeriodInHours} horas
+              </Text>
+               <Text style={{ color: theme.text }}>
+                Tomados {med.takenQuantity}/{med.totalQuantity} 
+              </Text>
+            </View>
+         
           </TouchableOpacity>
         ))}
       </View>

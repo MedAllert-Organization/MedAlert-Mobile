@@ -115,7 +115,7 @@ export default function TreatmentDetailScreen() {
           ) : (
             <MedicineComponent
               medicines={treatment.medications ?? []}
-              title="All medications"
+              title="Todos os medicamentos"
             />
           )}
 

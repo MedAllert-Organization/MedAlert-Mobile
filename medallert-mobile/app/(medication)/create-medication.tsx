@@ -37,6 +37,8 @@ export type Medication = {
   visualTypeId: string | null;
   soundTypeId: string | null;
   alertPeriodInHours: number;
+  takenQuantity: number;
+  totalQuantity: number;
   createdAt: string;
   updatedAt: string;
 };

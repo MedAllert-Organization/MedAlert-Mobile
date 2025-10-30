@@ -81,9 +81,9 @@ export default function MedicineDetail() {
       )}
 
       <View style={styles.infoBox}>
-        <Text style={[styles.infoText, { color: theme.text }]}>
+        {/* <Text style={[styles.infoText, { color: theme.text }]}>
           Alert every {medication.alertPeriodInHours} hours
-        </Text>
+        </Text> */}
 
         <Text style={[styles.infoText, { color: theme.text }]}>
           Created at: {new Date(medication.createdAt).toLocaleString()}
