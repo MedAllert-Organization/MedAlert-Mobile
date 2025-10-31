@@ -5,6 +5,9 @@ export default function MedicationLayout() {
     <Stack>
       <Stack.Screen name="create-medication" options={{ headerShown: false }} />
       <Stack.Screen name="create-treatment" options={{ headerShown: false }} />
+      <Stack.Screen name="medication-detail" options={{ headerShown: false }} />
+      <Stack.Screen name="medication-treatment" options={{ headerShown: false }} />
+      <Stack.Screen name="treatment-detail" options={{ headerShown: false }} />
       <Stack.Screen
         name="share-medication"
         options={{ headerShown: false, presentation: "modal" }}

@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import env from "@/config/env";
-import { router, useFocusEffect } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import Background from "@/components/Background";
 
 export type Medication = {
@@ -32,28 +32,6 @@ export type Medication = {
   takenQuantity: number | null;
   totalQuantity: number | null;
 };
-
-function getTimeRemaining(med: Medication & { lastTaken?: string }) {
-  try {
-    const now = new Date();
-
-    // Usa lastTaken se existir, senão createdAt
-    const referenceTime = med.lastTaken ? new Date(med.lastTaken) : new Date(med.createdAt);
-
-    const periodMs = med.alertPeriodInHours * 60 * 60 * 1000;
-    const elapsedMs = now.getTime() - referenceTime.getTime();
-    const remainderMs = periodMs - (elapsedMs % periodMs);
-
-    const hours = Math.floor(remainderMs / (1000 * 60 * 60));
-    const minutes = Math.floor((remainderMs % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (hours <= 0 && minutes <= 0) return "Agora";
-    if (hours === 0) return `em ${minutes} min`;
-    return `em ${hours}h ${minutes}min`;
-  } catch {
-    return "";
-  }
-}
 
 export default function Initial() {
   const { logout, token } = useAuth();
@@ -105,19 +83,12 @@ export default function Initial() {
   useEffect(() => {
     const interval = setInterval(() => {
       setMedicines((prev) => [...prev]);
-    }, 60000); // 1 minuto
+    }, 60000); // Atualiza a cada 1 min
     return () => clearInterval(interval);
   }, []);
 
   function handlePress(med: Medication) {
-    // router.push({
-    //   pathname: "/medication-detail",
-    //   params: { id: medId },
-    // });
-    // router.push({
-    //   pathname: "/medication-detail",
-    //   params: { med: JSON.stringify(med) },
-    // });
+    // router.push({ pathname: "/medication-detail", params: { id: med.medicationId } });
   }
 
   return (
@@ -162,7 +133,6 @@ export default function Initial() {
                       },
                     ]}
                   >
-
                     <View>
                       <Text style={{ color: theme.text, fontWeight: "600" }}>
                         {med.name}
@@ -174,18 +144,12 @@ export default function Initial() {
                         </Text>
                       )}
 
-                      <Text style={{ color: theme.text, opacity: 0.6 }}>
-                        Próxima dose {getTimeRemaining(med)}
-                      </Text>
-
                       {med.takenQuantity != null && med.totalQuantity != null && (
                         <Text style={{ color: theme.text, opacity: 0.6 }}>
-                          progresso: {med.takenQuantity}/{med.totalQuantity}
+                          Progresso: {med.takenQuantity}/{med.totalQuantity}
                         </Text>
                       )}
-
                     </View>
-
                   </TouchableOpacity>
                 ))}
               </View>

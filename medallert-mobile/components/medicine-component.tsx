@@ -65,10 +65,13 @@ export default function MedicineComponent({ medicines, title }: Props) {
                       fontSize: 13,
                       marginTop: 2,
                     }}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
                   >
                     {med.description}
                   </Text>
                 ) : null}
+
               </View>
 
               <View style={{ alignItems: "flex-end" }}>

@@ -13,7 +13,7 @@ import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
 import Background from "@/components/Background";
 import { BackButton } from "@/components/BackButton";
-import { Medication } from "./(medication)/create-medication";
+import { Medication } from "./create-medication";
 
 type MedicationGeneral = {
   medicationId: string;

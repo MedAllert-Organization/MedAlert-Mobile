@@ -18,7 +18,7 @@ import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
 import { BackButton } from "@/components/BackButton";
 import Background from "@/components/Background";
-import { Treatment } from "./(medication)/create-treatment";
+import { Treatment } from "./create-treatment";
 import MedicineTreatmentDetail from "./medication-treatment-detail";
 
 export default function TreatmentDetailScreen() {
