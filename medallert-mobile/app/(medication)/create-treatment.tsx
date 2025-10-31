@@ -168,7 +168,7 @@ export default function TreatmentsScreen() {
 
     setMedicationsData((prev) => {
       if (prev[id]) return prev;
-      return { ...prev, [id]: { dose: "1 unidade", totalQuantity: "0", alertPeriodInHours: "24" } };
+      return { ...prev, [id]: { dose: "", totalQuantity: "", alertPeriodInHours: "" } };
     });
   }
 
@@ -198,13 +198,13 @@ export default function TreatmentsScreen() {
 
       return {
         medicationId: id,
-        dose: medData?.dose || "1 unidade",
+        dose: medData?.dose || "",
         alertPeriodInHours:
           parseInt(medData?.alertPeriodInHours || "", 10) ||
-          (medFromList?.alertPeriodInHours || 24),
+          (medFromList?.alertPeriodInHours || 0),
         lastTaken: null,
         takenQuantity: 0,
-        totalQuantity: parseInt(medData?.totalQuantity || "0", 10),
+        totalQuantity: parseInt(medData?.totalQuantity || "", 10),
       };
     });
 

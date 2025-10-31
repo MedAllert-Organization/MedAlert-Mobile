@@ -123,67 +123,6 @@ export default function MedicineDetail() {
           </Text>
         )}
 
-        <View style={styles.infoBox}>
-          {medication.alertPeriodInHours != null && (
-            <Text style={[styles.infoText, { color: theme.text }]}>
-              Intervalo: {medication.alertPeriodInHours}h
-            </Text>
-          )}
-
-          <Text style={[styles.infoText, { color: theme.text }]}>
-            Progresso: {medication.takenQuantity} / {medication.totalQuantity}
-          </Text>
-
-          {medication.lastTaken && (
-            <>
-              <Text style={[styles.infoText, { color: theme.text }]}>
-                Última dose: {new Date(medication.lastTaken).toLocaleString()}
-              </Text>
-              <Text style={[styles.infoText, { color: theme.text }]}>
-                Próxima dose: {getNextDoseTime(medication)}
-              </Text>
-            </>
-          )}
-        </View>
-
-        {treatments.length > 0 && (
-          <View style={{ marginTop: 20 }}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>
-              Vinculada a {treatments.length} tratamento(s)
-            </Text>
-
-            {treatments.map((t) => (
-              <TouchableOpacity
-                key={t.id}
-                onPress={() =>
-                  router.push({
-                    pathname: "/treatment-detail",
-                    params: { treatmentId: t.id },
-                  })
-                }
-                style={[
-                  styles.treatmentCard,
-                  { backgroundColor: theme.background },
-                ]}
-              >
-                <Text style={[styles.treatmentName, { color: theme.text }]}>
-                  {t.name}
-                </Text>
-                {t.description && (
-                  <Text
-                    style={{
-                      color: theme.text,
-                      opacity: 0.7,
-                      fontSize: 13,
-                    }}
-                  >
-                    {t.description}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
       </ScrollView>
     </Background>
   );
