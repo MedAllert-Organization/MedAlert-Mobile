@@ -196,7 +196,9 @@ export default function CreateMedication() {
                 <TextField
                   value={medicationDesc}
                   onChangeText={setMedicationDesc}
-                  placeholder="Para dor de cabeça..."
+                  placeholder="Ex: Para dor de cabeça..."
+                  multiline
+                  inputStyle={{ height: 160, textAlignVertical: "top" }}
                 />
 
 

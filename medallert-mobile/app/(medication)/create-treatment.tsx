@@ -250,6 +250,8 @@ export default function TreatmentsScreen() {
           value={newTreatmentDesc}
           onChangeText={setNewTreatmentDesc}
           placeholder="Ex: Tratamento com anti-inflamatório"
+          multiline
+          inputStyle={{ height: 160, textAlignVertical: "top" }}
         />
 
         <Text style={styles.label}>Medicamentos</Text>
