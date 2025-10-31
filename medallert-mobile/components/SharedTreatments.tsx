@@ -1,8 +1,9 @@
+import { useCallback, useEffect, useState } from "react";
+import { Text, View, StyleSheet, FlatList, Alert, TouchableOpacity } from "react-native";
+import { router } from "expo-router";
 import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
 import styles from "@/utils/styles";
-import { useCallback, useEffect, useState } from "react";
-import { Text, View, StyleSheet, FlatList, Alert } from "react-native";
 
 interface SharedTreatmentsResponse {
   success: boolean;
@@ -54,10 +55,15 @@ export function SharedTreatments() {
   }, []);
 
   useEffect(() => {
-    (async () => {
-      await listSharedTreatments();
-    })();
+    listSharedTreatments();
   }, [listSharedTreatments]);
+
+  function handlePress(treatmentId: string) {
+    router.push({
+      pathname: "/treatment-detail",
+      params: { id: treatmentId },
+    });
+  }
 
   return (
     <View>
@@ -73,7 +79,10 @@ export function SharedTreatments() {
           data={treatments}
           keyExtractor={(item) => item.treatment.treatmentId}
           renderItem={({ item }) => (
-            <View style={localStyles.card}>
+            <TouchableOpacity
+              style={localStyles.card}
+              onPress={() => handlePress(item.treatment.treatmentId)}
+            >
               <Text style={localStyles.userInfo}>
                 Compartilhado por: {item.treatment.user.fullName}
               </Text>
@@ -87,7 +96,7 @@ export function SharedTreatments() {
                   </Text>
                 )}
               </View>
-            </View>
+            </TouchableOpacity>
           )}
         />
       )}

@@ -83,13 +83,21 @@ export default function Initial() {
   useEffect(() => {
     const interval = setInterval(() => {
       setMedicines((prev) => [...prev]);
-    }, 60000); // Atualiza a cada 1 min
+    }, 600000); 
     return () => clearInterval(interval);
   }, []);
 
   function handlePress(med: Medication) {
     // router.push({ pathname: "/medication-detail", params: { id: med.medicationId } });
   }
+
+  function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 12) return "Bom dia";
+    if (hour >= 12 && hour < 18) return "Boa tarde";
+    return "Boa noite";
+  }
+
 
   return (
     <Background>
@@ -100,13 +108,16 @@ export default function Initial() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.text }]}>Summary</Text>
+            <Text style={[styles.title, { color: theme.text }]}>
+              {getGreeting()}!
+            </Text>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               <TouchableOpacity onPress={logout}>
                 <MaterialCommunityIcons name="logout" size={24} color={theme.text} />
               </TouchableOpacity>
             </View>
           </View>
+
 
           {medicines.length === 0 ? (
             <View style={[localStyles.card, { backgroundColor: theme.background }]}>
