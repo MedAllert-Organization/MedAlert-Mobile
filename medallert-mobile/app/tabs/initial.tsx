@@ -150,7 +150,7 @@ export default function Initial() {
               <View style={[localStyles.card, { backgroundColor: theme.background }]}>
                 {medicines.map((med, idx) => (
                   <TouchableOpacity
-                    key={med.medicationId}
+                    key={`${med.medicationId}-${med.treatmentId ?? idx}`}
                     onPress={() => handlePress(med)}
                     style={[
                       localStyles.row,
@@ -160,6 +160,7 @@ export default function Initial() {
                       },
                     ]}
                   >
+
                     <View>
                       <Text style={{ color: theme.text, fontWeight: "600" }}>
                         {med.name}
