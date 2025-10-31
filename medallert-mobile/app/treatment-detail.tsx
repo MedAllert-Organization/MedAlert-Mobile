@@ -1,24 +1,22 @@
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
-  useColorScheme,
   Alert,
   ScrollView,
+  useColorScheme,
 } from "react-native";
 import Colors from "@/constants/Colors";
 import styles from "@/utils/styles";
-import { Ionicons } from "@expo/vector-icons";
 import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
 import { BackButton } from "@/components/BackButton";
 import Background from "@/components/Background";
 import { Treatment } from "./(medication)/create-treatment";
-import MedicineComponent from "@/components/medicine-component";
+import MedicineTreatmentDetail from "./medication-treatment-detail";
 
 export default function TreatmentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -42,8 +40,9 @@ export default function TreatmentDetailScreen() {
         if (!res.ok) throw new Error("Erro ao buscar tratamento");
 
         const data = await res.json();
-        console.log(data)
-        setTreatment(data.treatment);
+        console.log("🔹 Tratamento recebido:", data);
+
+        setTreatment(data.treatment ?? data);
       } catch (err) {
         Alert.alert("Erro", "Não foi possível carregar o tratamento.");
         console.error(err);
@@ -64,7 +63,6 @@ export default function TreatmentDetailScreen() {
       year: "numeric",
     });
   }
-
 
   if (loading)
     return (
@@ -88,60 +86,32 @@ export default function TreatmentDetailScreen() {
         {treatment.name}
       </Text>
 
-      <Text>
-        inicio:
-        {formatDate(treatment.startAt)}
+      <Text style={{ color: theme.text }}>
+        Início: {formatDate(treatment.startAt)}
       </Text>
-      <Text>
-        término:
-        {formatDate(treatment.endAt)}
+      <Text style={{ color: theme.text, marginBottom: 10 }}>
+        Término: {formatDate(treatment.endAt)}
       </Text>
 
-      {loading ? (
-        <View style={localStyles.center}>
-          <ActivityIndicator size="large" color={theme.tint} />
-        </View>
-      ) : (
+      <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+  {(!treatment.medications || treatment.medications.length === 0) ? (
+    <View style={[localStyles.card, { backgroundColor: theme.background }]}>
+      <Text style={{ color: theme.text, textAlign: "center" }}>
+        Nenhuma medicação foi encontrada.
+      </Text>
+    </View>
+  ) : (
+    (treatment.medications ?? []).map((medication, i) => (
+      <MedicineTreatmentDetail key={i} medication={medication} />
+    ))
+  )}
+</ScrollView>
 
-        <ScrollView contentContainerStyle={{ paddingBottom: 0 }}>
-
-
-          {(treatment.medications ?? []).length === 0 ? (
-            <View style={[localStyles.card, { backgroundColor: theme.background }]}>
-              <Text style={{ color: theme.text, textAlign: "center" }}>
-                Nenhuma medicação foi encontrada
-              </Text>
-            </View>
-          ) : (
-            <MedicineComponent
-              medicines={treatment.medications ?? []}
-              title="Todos os medicamentos"
-            />
-          )}
-
-        </ScrollView>
-      )}
     </Background>
-
   );
 }
 
 const localStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  backButton: {
-    marginBottom: 12,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  progressContainer: {
-    marginBottom: 16,
-  },
   card: {
     borderRadius: 12,
     padding: 12,
@@ -152,14 +122,6 @@ const localStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 2,
-  },
-  medRow: {
-    marginVertical: 6,
-  },
-  takeButton: {
-    borderRadius: 10,
-    alignItems: "center",
-    paddingVertical: 14,
   },
   center: {
     flex: 1,

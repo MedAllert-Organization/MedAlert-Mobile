@@ -19,51 +19,79 @@ export default function MedicineComponent({ medicines, title }: Props) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  function handlePress(medId: string) {
+  function handlePress(med: Medication) {
     router.push({
       pathname: "/medication-detail",
-      params: { id: medId },
+      params: { med: JSON.stringify(med) },
     });
   }
 
   return (
     <View>
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>{title}</Text>
+      {title ? (
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>{title}</Text>
+      ) : null}
 
       <View style={[localStyles.card, { backgroundColor: theme.background }]}>
-        {medicines.map((med, idx) => (
-          <TouchableOpacity
-            key={med.medicationId}
-            onPress={() => handlePress(med.medicationId)}
-            style={[
-              localStyles.row,
-              {
-                borderBottomWidth: idx !== medicines.length - 1 ? 0.2 : 0,
-                borderBottomColor: theme.text,
-              },
-            ]}
-          >
-            <View>
-              <Text style={{ color: theme.text, fontWeight: "600" }}>
-                {med.name}
-              </Text>
-              {med.dose && (
-                <Text style={{ color: theme.text, opacity: 0.7 }}>
-                  Dose: {med.dose}
+        {medicines?.length ? (
+          medicines.map((med, idx) => (
+            <TouchableOpacity
+              key={med.medicationId ?? idx}
+              onPress={() => handlePress(med)}
+              style={[
+                localStyles.row,
+                {
+                  borderBottomWidth: idx !== medicines.length - 1 ? 0.2 : 0,
+                  borderBottomColor: theme.text,
+                },
+              ]}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: theme.text, fontWeight: "600" }}>
+                  {med.name ?? "Sem nome"}
                 </Text>
-              )}
-            </View>
-            <View>
-               <Text style={{ color: theme.text}}>
-                A cada {med.alertPeriodInHours} horas
-              </Text>
-               <Text style={{ color: theme.text }}>
-                Tomados {med.takenQuantity}/{med.totalQuantity} 
-              </Text>
-            </View>
-         
-          </TouchableOpacity>
-        ))}
+
+                {med.dose ? (
+                  <Text style={{ color: theme.text, opacity: 0.7 }}>
+                    Dose: {med.dose}
+                  </Text>
+                ) : null}
+
+                {med.description ? (
+                  <Text
+                    style={{
+                      color: theme.text,
+                      opacity: 0.6,
+                      fontSize: 13,
+                      marginTop: 2,
+                    }}
+                  >
+                    {med.description}
+                  </Text>
+                ) : null}
+              </View>
+
+              <View style={{ alignItems: "flex-end" }}>
+                {typeof med.alertPeriodInHours === "number" && (
+                  <Text style={{ color: theme.text }}>
+                    A cada {med.alertPeriodInHours}h
+                  </Text>
+                )}
+
+                {typeof med.takenQuantity === "number" &&
+                  typeof med.totalQuantity === "number" && (
+                    <Text style={{ color: theme.text }}>
+                      Tomados {med.takenQuantity}/{med.totalQuantity}
+                    </Text>
+                  )}
+              </View>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={{ color: theme.text, opacity: 0.6, textAlign: "center" }}>
+            Nenhuma medicação encontrada
+          </Text>
+        )}
       </View>
     </View>
   );

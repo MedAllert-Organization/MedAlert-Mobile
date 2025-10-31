@@ -31,22 +31,23 @@ export type Medication = {
   updatedAt: string;
 };
 
-function getTimeRemaining(med: Medication) {
+function getTimeRemaining(med: Medication & { lastTaken?: string }) {
   try {
     const now = new Date();
-    const createdAt = new Date(med.createdAt);
+
+    // Usa lastTaken se existir, senão createdAt
+    const referenceTime = med.lastTaken ? new Date(med.lastTaken) : new Date(med.createdAt);
 
     const periodMs = med.alertPeriodInHours * 60 * 60 * 1000;
-
-    const elapsedMs = now.getTime() - createdAt.getTime();
+    const elapsedMs = now.getTime() - referenceTime.getTime();
     const remainderMs = periodMs - (elapsedMs % periodMs);
 
     const hours = Math.floor(remainderMs / (1000 * 60 * 60));
     const minutes = Math.floor((remainderMs % (1000 * 60 * 60)) / (1000 * 60));
 
-    if (hours <= 0 && minutes <= 0) return "Now";
-    if (hours === 0) return `in ${minutes} min`;
-    return `in ${hours}h ${minutes}min`;
+    if (hours <= 0 && minutes <= 0) return "Agora";
+    if (hours === 0) return `em ${minutes} min`;
+    return `em ${hours}h ${minutes}min`;
   } catch {
     return "";
   }
@@ -106,11 +107,15 @@ export default function Initial() {
     return () => clearInterval(interval);
   }, []);
 
-  function handlePress(medId: string) {
-    router.push({
-      pathname: "/medication-detail",
-      params: { id: medId },
-    });
+  function handlePress(med: Medication) {
+    // router.push({
+    //   pathname: "/medication-detail",
+    //   params: { id: medId },
+    // });
+    // router.push({
+    //   pathname: "/medication-detail",
+    //   params: { med: JSON.stringify(med) },
+    // });
   }
 
   return (
@@ -146,7 +151,7 @@ export default function Initial() {
                 {medicines.map((med, idx) => (
                   <TouchableOpacity
                     key={med.medicationId}
-                    onPress={() => handlePress(med.medicationId)}
+                    onPress={() => handlePress(med)}
                     style={[
                       localStyles.row,
                       {
@@ -171,9 +176,6 @@ export default function Initial() {
                       </Text>
                     </View>
 
-                    <Text style={{ color: theme.text, opacity: 0.7 }}>
-                      A cada {med.alertPeriodInHours}h
-                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>

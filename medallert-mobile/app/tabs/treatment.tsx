@@ -15,7 +15,6 @@ import { useAuth } from "@/providers/auth-provider";
 import styles from "@/utils/styles";
 import env from "@/config/env";
 import { Treatment } from "../(medication)/create-treatment";
-import TreatmentComponent from "@/components/treatment-component";
 
 export default function TreatmentView() {
     const { logout, token } = useAuth();
@@ -32,6 +31,23 @@ export default function TreatmentView() {
             </View>
         </TouchableOpacity>
     );
+
+      function handlePress(treatmentId: string) {
+    router.push({
+      pathname: "/treatment-detail",
+      params: { id: treatmentId },
+    });
+  }
+
+  function formatDate(dateString: string | null): string {
+    if (!dateString) return "Sem data definida";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
 
     useFocusEffect(
         useCallback(() => {
@@ -89,7 +105,7 @@ export default function TreatmentView() {
                         <>
                             <View style={[localStyles.card, { backgroundColor: theme.background }]}>
                                 <Text style={{ color: theme.text, textAlign: "center" }}>
-                                   Nenhum tratamento encontrado
+                                    Nenhum tratamento encontrado
                                 </Text>
 
                             </View>
@@ -98,7 +114,45 @@ export default function TreatmentView() {
 
                     ) : (
                         <>
-                            <TreatmentComponent treatments={treatments} title="All treatments" />
+                            {/* <TreatmentComponent treatments={treatments} title="Todos os Tratamentos" /> */}
+                               <View>
+      {/* <Text style={[styles.sectionTitle, { color: theme.text }]}>{title}</Text> */}
+
+      <View style={[localStyles.card, { backgroundColor: theme.background }]}>
+        {treatments.map((trea, idx) => (
+          <TouchableOpacity
+            key={trea.treatmentId}
+            onPress={() => handlePress(trea.treatmentId)}
+            style={[
+              localStyles.row,
+              {
+                borderBottomWidth: idx !== treatments.length - 1 ? 0.2 : 0,
+                borderBottomColor: theme.text,
+              },
+            ]}
+          >
+            <View>
+              <Text style={{ color: theme.text, fontWeight: "600" }}>
+                {trea.name}
+              </Text>
+
+              {trea.description && (
+                <Text
+                  style={{ color: theme.text, opacity: 0.7, fontSize: 13 }}
+                  numberOfLines={1}
+                >
+                  {trea.description}
+                </Text>
+              )}
+
+              <Text style={{ color: theme.text, opacity: 0.5, fontSize: 12, marginTop: 4 }}>
+                Termina em: {formatDate(trea.endAt)}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
                             <AddTreatmentButton />
                         </>
                     )}
@@ -125,4 +179,10 @@ const localStyles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
+      row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
 });

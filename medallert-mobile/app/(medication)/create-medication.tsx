@@ -30,17 +30,18 @@ export type MedicationsRequest = {
 export type Medication = {
   medicationId: string;
   treatmentId: string | null;
-  userId: string;
-  name: string;
-  dose: string;
-  description: string;
+  userId: string | null;
+  name: string | null
+  dose: string | null;
+  description: string | null;
   visualTypeId: string | null;
   soundTypeId: string | null;
-  alertPeriodInHours: number;
-  takenQuantity: number;
-  totalQuantity: number;
-  createdAt: string;
-  updatedAt: string;
+  alertPeriodInHours: number | null;
+  takenQuantity: number | null;
+  totalQuantity: number | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  lastTaken: Date | null;
 };
 
 type CreateMedication = {
@@ -143,9 +144,7 @@ export default function CreateMedication() {
   async function handleCreateMedication() {
     if (
       !medicationName ||
-      !medicationDose ||
-      !medicationDesc ||
-      medicationPeriod <= 0
+      !medicationDesc
     ) {
       Alert.alert("Atenção", "Preencha todos os campos corretamente!");
       return;
@@ -193,13 +192,6 @@ export default function CreateMedication() {
                   placeholder="Ex: Paracetamol"
                 />
 
-                <Text style={styles.label}>Dose</Text>
-                <TextField
-                  value={medicationDose}
-                  onChangeText={setMedicationDose}
-                  placeholder="Ex: 500mg"
-                />
-
                 <Text style={styles.label}>Descrição</Text>
                 <TextField
                   value={medicationDesc}
@@ -207,13 +199,6 @@ export default function CreateMedication() {
                   placeholder="Para dor de cabeça..."
                 />
 
-                <Text style={styles.label}>Intervalo (em horas)</Text>
-                <TextField
-                  keyboardType="decimal-pad"
-                  value={String(medicationPeriod)}
-                  onChangeText={(t) => setMedicationPeriod(Number(t))}
-                  placeholder="Ex: 8"
-                />
 
                 <DateTimePickerModal
                   isVisible={isMedicationDateVisible}
@@ -240,7 +225,7 @@ export default function CreateMedication() {
                 meds.map((item) => (
                   <MedicationItem
                     key={item.medicationId}
-                    name={item.name}
+                    name={item.name ?? ""}
                     onPress={() => deleteMedication(item.medicationId)}
                   />
                 ))
