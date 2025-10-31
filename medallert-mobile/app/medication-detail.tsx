@@ -5,9 +5,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
-  TouchableOpacity,
 } from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useColorScheme } from "react-native";
 import Colors from "@/constants/Colors";
 import env from "@/config/env";
@@ -29,9 +28,7 @@ type MedicationGeneral = {
 type Treatment = {
   id: string;
   name: string;
-  description?: string;
-  startAt?: string;
-  endAt?: string | null;
+  description?: string | null;
 };
 
 export default function MedicineDetail() {
@@ -46,32 +43,33 @@ export default function MedicineDetail() {
   const theme = Colors[colorScheme ?? "light"];
 
   const fetchGeneralInfo = useCallback(async () => {
+    if (!medication?.medicationId) return;
+    setLoading(true);
+
     try {
       const token = await getToken();
 
       const [medRes, treatRes] = await Promise.all([
-        fetch(`${env.BASE_URL}/medication/medication/${medication?.medicationId}`, {
+        fetch(`${env.BASE_URL}/medication/medication/${medication.medicationId}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${env.BASE_URL}/treatment/by-medication/${medication?.medicationId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        fetch(
+          `${env.BASE_URL}/medication/medication/linkedTreatments/${medication.medicationId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        ),
       ]);
 
       const medData = await medRes.json().catch(() => null);
       const treatData = await treatRes.json().catch(() => null);
 
-      if (medData?.success) {
-        const found =
-          medData.medications?.find?.(
-            (m: MedicationGeneral) => m.medicationId === medication?.medicationId
-          ) ?? medData.medication;
-
-        if (found) setGeneralInfo(found);
+      if (medData?.success && medData.medication) {
+        setGeneralInfo(medData.medication);
       }
 
-      if (treatData?.success && Array.isArray(treatData.treatments)) {
-        setTreatments(treatData.treatments);
+      if (treatData?.success && Array.isArray(treatData.medication)) {
+        setTreatments(treatData.medication);
       }
     } catch (err) {
       console.error("Erro ao buscar informações da medicação", err);
@@ -81,9 +79,7 @@ export default function MedicineDetail() {
   }, [medication?.medicationId]);
 
   useEffect(() => {
-    if (medication) {
-      fetchGeneralInfo();
-    }
+    fetchGeneralInfo();
   }, [fetchGeneralInfo]);
 
   if (!medication) {
@@ -111,53 +107,52 @@ export default function MedicineDetail() {
       <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
         <Text style={[styles.title, { color: theme.text }]}>{medication.name}</Text>
 
-        {medication.dose && (
-          <Text style={[styles.subtitle, { color: theme.text }]}>
-            Dose: {medication.dose}
-          </Text>
-        )}
-
         {generalInfo?.description && (
           <Text style={[styles.description, { color: theme.text }]}>
             {generalInfo.description}
           </Text>
         )}
 
+        <View style={{ marginTop: 24 }}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+            Tratamentos vinculados
+          </Text>
+
+          {treatments.length === 0 ? (
+            <Text style={{ color: theme.text, opacity: 0.6 }}>
+              Nenhum tratamento vinculado.
+            </Text>
+          ) : (
+            treatments.map((treatment) => (
+              <View
+                key={treatment.id}
+                style={[
+                  styles.treatmentCard,
+                  { backgroundColor: theme.background },
+                ]}
+              >
+                <Text style={[styles.treatmentName, { color: theme.text }]}>
+                  {treatment.name}
+                </Text>
+                {treatment.description && (
+                  <Text style={{ color: theme.text, opacity: 0.7 }}>
+                    {treatment.description}
+                  </Text>
+                )}
+              </View>
+            ))
+          )}
+        </View>
       </ScrollView>
     </Background>
   );
-}
-
-function getNextDoseTime(med: Medication) {
-  if (!med.lastTaken) return "Ainda não tomou";
-
-  const last = new Date(med.lastTaken);
-  const periodMs = (med.alertPeriodInHours ?? 0) * 60 * 60 * 1000;
-  const nextDose = new Date(last.getTime() + periodMs);
-  const now = new Date();
-
-  if (nextDose <= now) return "Agora";
-
-  const diffMs = nextDose.getTime() - now.getTime();
-  const hours = Math.floor(diffMs / (1000 * 60 * 60));
-  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-  if (hours === 0) return `em ${minutes} min`;
-  return `em ${hours}h ${minutes}min`;
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   title: { fontSize: 22, fontWeight: "700", marginBottom: 6 },
-  subtitle: { fontSize: 16, fontWeight: "500", marginBottom: 10 },
   description: { fontSize: 15, opacity: 0.8, marginBottom: 16 },
-  infoBox: {
-    borderRadius: 10,
-    padding: 12,
-    backgroundColor: "#00000010",
-  },
-  infoText: { fontSize: 14, marginBottom: 4 },
   controlsContainer: {
     flexDirection: "row",
     alignItems: "center",

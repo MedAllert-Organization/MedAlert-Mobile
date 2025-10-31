@@ -94,18 +94,18 @@ export default function TreatmentDetailScreen() {
       </Text>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
-  {(!treatment.medications || treatment.medications.length === 0) ? (
-    <View style={[localStyles.card, { backgroundColor: theme.background }]}>
-      <Text style={{ color: theme.text, textAlign: "center" }}>
-        Nenhuma medicação foi encontrada.
-      </Text>
-    </View>
-  ) : (
-    (treatment.medications ?? []).map((medication, i) => (
-      <MedicineTreatmentDetail key={i} medication={medication} />
-    ))
-  )}
-</ScrollView>
+        {(!treatment.medications || treatment.medications.length === 0) ? (
+          <View style={[localStyles.card, { backgroundColor: theme.background }]}>
+            <Text style={{ color: theme.text, textAlign: "center" }}>
+              Nenhuma medicação foi encontrada.
+            </Text>
+          </View>
+        ) : (
+          (treatment.medications ?? []).map((medication, i) => (
+            <MedicineTreatmentDetail key={i} medication={medication} />
+          ))
+        )}
+      </ScrollView>
 
     </Background>
   );
