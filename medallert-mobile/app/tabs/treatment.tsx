@@ -15,6 +15,7 @@ import { useAuth } from "@/providers/auth-provider";
 import styles from "@/utils/styles";
 import env from "@/config/env";
 import { Treatment } from "../(medication)/create-treatment";
+import { SharedTreatments } from "@/components/SharedTreatments";
 
 export default function TreatmentView() {
   const { logout, token } = useAuth();
@@ -158,6 +159,7 @@ export default function TreatmentView() {
           )}
         </ScrollView>
       )}
+      <SharedTreatments/>
 
     </Background>
   );

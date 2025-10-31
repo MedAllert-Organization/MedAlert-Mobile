@@ -16,7 +16,6 @@ import { useAuth } from "@/providers/auth-provider";
 import styles from "@/utils/styles";
 import env from "@/config/env";
 import type { Medication } from "../(medication)/create-medication";
-import { SharedMedications } from "@/components/SharedMedications";
 
 export default function MedicationView() {
   const { token } = useAuth();
@@ -114,7 +113,7 @@ export default function MedicationView() {
               <AddMedicationButton />
             </>
           )}
-          <SharedMedications />
+      
         </View>
       )}
     </Background>
