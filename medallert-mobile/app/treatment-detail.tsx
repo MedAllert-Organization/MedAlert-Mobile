@@ -8,6 +8,9 @@ import {
   Alert,
   ScrollView,
   useColorScheme,
+  TouchableOpacity,
+  TextInput,
+  Modal,
 } from "react-native";
 import Colors from "@/constants/Colors";
 import styles from "@/utils/styles";
@@ -25,6 +28,8 @@ export default function TreatmentDetailScreen() {
 
   const [treatment, setTreatment] = useState<Treatment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [shareVisible, setShareVisible] = useState(false);
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     const fetchTreatment = async () => {
@@ -54,6 +59,38 @@ export default function TreatmentDetailScreen() {
     fetchTreatment();
   }, [id]);
 
+  async function handleShare() {
+    if (!email.trim()) {
+      Alert.alert("Atenção", "Informe um e-mail para compartilhar.");
+      return;
+    }
+
+    try {
+      const token = await getToken();
+
+      const res = await fetch(`${env.BASE_URL}/medication/${id}/share`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || "Falha ao compartilhar tratamento");
+      }
+
+      Alert.alert("Sucesso", "Tratamento compartilhado com sucesso!");
+      setShareVisible(false);
+      setEmail("");
+    } catch (err: any) {
+      console.error(err);
+      Alert.alert("Erro", err.message ?? "Falha ao compartilhar tratamento.");
+    }
+  }
+
   function formatDate(dateString: string | null): string {
     if (!dateString) return "Sem data definida";
     const date = new Date(dateString);
@@ -82,9 +119,18 @@ export default function TreatmentDetailScreen() {
     <Background>
       <BackButton />
 
-      <Text style={[styles.title, { color: theme.text, marginBottom: 6 }]}>
-        {treatment.name}
-      </Text>
+      <View style={localStyles.headerRow}>
+        <Text style={[styles.title, { color: theme.text, flex: 1 }]}>
+          {treatment.name}
+        </Text>
+
+        <TouchableOpacity
+          onPress={() => setShareVisible(true)}
+          style={[localStyles.shareButton, { backgroundColor: theme.tint }]}
+        >
+          <Text style={{ color: "#fff", fontWeight: "600" }}>Compartilhar</Text>
+        </TouchableOpacity>
+      </View>
 
       <Text style={{ color: theme.text }}>
         Início: {formatDate(treatment.startAt)}
@@ -107,11 +153,75 @@ export default function TreatmentDetailScreen() {
         )}
       </ScrollView>
 
+      {/* MODAL DE COMPARTILHAMENTO */}
+      <Modal visible={shareVisible} transparent animationType="fade">
+        <View style={localStyles.modalOverlay}>
+          <View
+            style={[
+              localStyles.modalContent,
+              { backgroundColor: theme.background },
+            ]}
+          >
+            <Text
+              style={{
+                color: theme.text,
+                fontSize: 18,
+                fontWeight: "600",
+                marginBottom: 8,
+              }}
+            >
+              Compartilhar tratamento
+            </Text>
+            <Text style={{ color: theme.text, marginBottom: 8 }}>
+              Digite o e-mail da pessoa:
+            </Text>
+            <TextInput
+              style={[
+                localStyles.input,
+                {
+                  borderColor: theme.tint,
+                  color: theme.text,
+                },
+              ]}
+              placeholder="exemplo@email.com"
+              placeholderTextColor={theme.text + "88"}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <View style={localStyles.modalButtons}>
+              <TouchableOpacity
+                onPress={() => setShareVisible(false)}
+                style={[localStyles.modalButton, { backgroundColor: "#aaa" }]}
+              >
+                <Text style={{ color: "#fff" }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleShare}
+                style={[localStyles.modalButton, { backgroundColor: theme.tint }]}
+              >
+                <Text style={{ color: "#fff" }}>Enviar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Background>
   );
 }
 
 const localStyles = StyleSheet.create({
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  shareButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
   card: {
     borderRadius: 12,
     padding: 12,
@@ -127,5 +237,34 @@ const localStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "#00000066",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  modalContent: {
+    width: "100%",
+    borderRadius: 12,
+    padding: 16,
+  },
+  input: {
+    width: "100%",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 8,
+  },
+  modalButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
 });

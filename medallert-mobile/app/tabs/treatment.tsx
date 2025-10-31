@@ -115,10 +115,7 @@ export default function TreatmentView() {
 
           ) : (
             <>
-              {/* <TreatmentComponent treatments={treatments} title="Todos os Tratamentos" /> */}
-              <View>
-                {/* <Text style={[styles.sectionTitle, { color: theme.text }]}>{title}</Text> */}
-
+             
                 <View style={[localStyles.card, { backgroundColor: theme.background }]}>
                   {treatments.map((trea, idx) => (
                     <TouchableOpacity
@@ -153,7 +150,7 @@ export default function TreatmentView() {
                     </TouchableOpacity>
                   ))}
                 </View>
-              </View>
+        
               <AddTreatmentButton />
             </>
           )}

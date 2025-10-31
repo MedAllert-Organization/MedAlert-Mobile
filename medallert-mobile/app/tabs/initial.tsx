@@ -29,6 +29,8 @@ export type Medication = {
   endTreatmentAt: string | null;
   createdAt: string;
   updatedAt: string;
+  takenQuantity: number | null;
+  totalQuantity: number | null;
 };
 
 function getTimeRemaining(med: Medication & { lastTaken?: string }) {
@@ -175,6 +177,13 @@ export default function Initial() {
                       <Text style={{ color: theme.text, opacity: 0.6 }}>
                         Próxima dose {getTimeRemaining(med)}
                       </Text>
+
+                      {med.takenQuantity != null && med.totalQuantity != null && (
+                        <Text style={{ color: theme.text, opacity: 0.6 }}>
+                          progresso: {med.takenQuantity}/{med.totalQuantity}
+                        </Text>
+                      )}
+
                     </View>
 
                   </TouchableOpacity>
