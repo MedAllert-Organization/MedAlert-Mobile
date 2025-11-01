@@ -5,14 +5,16 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { useColorScheme } from "react-native";
 import Colors from "@/constants/Colors";
 import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
 import Background from "@/components/Background";
 import { BackButton } from "@/components/BackButton";
+import ButtonPrimary from "@/components/ButtonPrimary";
 import { Medication } from "./create-medication";
 
 type MedicationGeneral = {
@@ -82,6 +84,16 @@ export default function MedicineDetail() {
     fetchGeneralInfo();
   }, [fetchGeneralInfo]);
 
+  const handleGoToNotes = () => {
+    router.push({
+      pathname: "/medication-notes-detail",
+      params: {
+        medicationId: medication?.medicationId,
+        medicationName: medication?.name,
+      },
+    });
+  };
+
   if (!medication) {
     return (
       <View style={[styles.center, { backgroundColor: theme.background }]}>
@@ -104,7 +116,7 @@ export default function MedicineDetail() {
         <BackButton />
       </View>
 
-      <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
+      <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
         <Text style={[styles.title, { color: theme.text }]}>{medication.name}</Text>
 
         {generalInfo?.description && (
@@ -143,6 +155,13 @@ export default function MedicineDetail() {
             ))
           )}
         </View>
+
+        <View style={styles.notesButtonContainer}>
+          <ButtonPrimary
+            title="📝 Ver Anotações deste Medicamento"
+            onPress={handleGoToNotes}
+          />
+        </View>
       </ScrollView>
     </Background>
   );
@@ -175,5 +194,9 @@ const styles = StyleSheet.create({
   treatmentName: {
     fontSize: 15,
     fontWeight: "500",
+  },
+  notesButtonContainer: {
+    marginTop: 30,
+    width: "100%",
   },
 });
