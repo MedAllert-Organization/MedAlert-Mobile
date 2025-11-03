@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import env from "@/config/env";
-import { useFocusEffect } from "@react-navigation/native"; // ✅ mais seguro
+import { useFocusEffect } from "@react-navigation/native"; 
 import * as Notifications from "expo-notifications";
 import Background from "@/components/Background";
 
@@ -44,20 +44,16 @@ export default function Initial() {
   const [medicines, setMedicines] = useState<Medication[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // === Cancelar e reagendar notificações ===
   const updateNotifications = async (meds: Medication[]) => {
     try {
-      // Cancela tudo antes de reagendar
       await Notifications.cancelAllScheduledNotificationsAsync();
 
       for (const med of meds) {
-        // Determinar o horário base
         const baseDate = med.lastTaken ? new Date(med.lastTaken) : new Date();
         const nextAlert = new Date(
           baseDate.getTime() + med.alertPeriodInHours * 60 * 60 * 1000
         );
 
-        // Evita agendar algo no passado
         if (nextAlert.getTime() > Date.now()) {
           await Notifications.scheduleNotificationAsync({
             content: {
@@ -66,10 +62,10 @@ export default function Initial() {
               sound: true,
             },
             trigger: {
-              type: "timeInterval", // <- obrigatório
+              type: "timeInterval", 
               seconds: Math.max(1, (nextAlert.getTime() - Date.now()) / 1000),
               repeats: false,
-            } as Notifications.TimeIntervalTriggerInput, // opcional para TS
+            } as Notifications.TimeIntervalTriggerInput,
           });
 
 
@@ -163,12 +159,18 @@ export default function Initial() {
 
               <View style={[localStyles.card, { backgroundColor: theme.background }]}>
                {medicines.map((med, idx) => {
-  // Calcula próximo horário
   const baseDate = med.lastTaken ? new Date(med.lastTaken) : new Date();
+
   const nextAlert = new Date(
     baseDate.getTime() + med.alertPeriodInHours * 60 * 60 * 1000
   );
-  const nextTimeFormatted = nextAlert.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  const isPast = nextAlert.getTime() <= Date.now();
+
+  const nextTimeFormatted = nextAlert.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return (
     <View
@@ -198,14 +200,20 @@ export default function Initial() {
           </Text>
         )}
 
-        {/* Próximo horário */}
-        <Text style={{ color: theme.text, opacity: 0.6 }}>
-          Próximo: {nextTimeFormatted}
-        </Text>
+        {!isPast ? (
+          <Text style={{ color: theme.text, opacity: 0.6 }}>
+            Próximo: {nextTimeFormatted}
+          </Text>
+        ) : (
+          <Text style={{ color: theme.text, opacity: 0.4 }}>
+            Nenhum horário futuro
+          </Text>
+        )}
       </View>
     </View>
   );
 })}
+
 
               </View>
             </View>
