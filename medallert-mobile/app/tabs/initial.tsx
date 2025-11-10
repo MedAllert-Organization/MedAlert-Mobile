@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Colors from "@/constants/Colors";
 import { useAuth } from "@/providers/auth-provider";
 import styles from "@/utils/styles";
@@ -14,26 +14,28 @@ import {
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import env from "@/config/env";
-import { useFocusEffect } from "@react-navigation/native"; 
+import { useFocusEffect } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import Background from "@/components/Background";
+import { errors } from "jose";
 
 export type Medication = {
   medicationId: string;
   treatmentId: string | null;
-  userId: string;
+  userId?: string;
   name: string;
   dose: string;
-  description: string;
-  visualTypeId: string | null;
-  soundTypeId: string | null;
+  description?: string;
+  visualTypeId?: string | null;
+  soundTypeId?: string | null;
   alertPeriodInHours: number;
-  endTreatmentAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  endTreatmentAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
   takenQuantity: number | null;
   totalQuantity: number | null;
   lastTaken?: string | null;
+  nextTakeAt?: string | null;
 };
 
 export default function Initial() {
@@ -49,11 +51,8 @@ export default function Initial() {
       await Notifications.cancelAllScheduledNotificationsAsync();
 
       for (const med of meds) {
-        const baseDate = med.lastTaken ? new Date(med.lastTaken) : new Date();
-        const nextAlert = new Date(
-          baseDate.getTime() + med.alertPeriodInHours * 60 * 60 * 1000
-        );
-
+        if (!med.nextTakeAt) continue;
+        const nextAlert = new Date(med.nextTakeAt);
         if (nextAlert.getTime() > Date.now()) {
           await Notifications.scheduleNotificationAsync({
             content: {
@@ -62,13 +61,11 @@ export default function Initial() {
               sound: true,
             },
             trigger: {
-              type: "timeInterval", 
+              type: "timeInterval",
               seconds: Math.max(1, (nextAlert.getTime() - Date.now()) / 1000),
               repeats: false,
             } as Notifications.TimeIntervalTriggerInput,
           });
-
-
         }
       }
     } catch (error) {
@@ -76,48 +73,91 @@ export default function Initial() {
     }
   };
 
+  const fetchMedicines = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${env.BASE_URL}/medication/treatment-medication/today`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar medicamentos: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const meds = Array.isArray(data?.medications) ? data.medications : [];
+
+      setMedicines(meds);
+      await updateNotifications(meds);
+    } catch (err) {
+      console.error("Erro ao buscar medicamentos:", err);
+      setMedicines([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
-
-      const fetchMedicines = async () => {
-        setLoading(true);
-        try {
-          // Cancela notificações ao entrar
-          await Notifications.cancelAllScheduledNotificationsAsync();
-
-          const response = await fetch(`${env.BASE_URL}/medication/medication/today`, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error(`Erro ao buscar medicamentos: ${response.status}`);
-          }
-
-          const data = await response.json();
-          const meds = Array.isArray(data?.medications) ? data.medications : [];
-
-          if (isActive) {
-            setMedicines(meds);
-            await updateNotifications(meds);
-          }
-        } catch (err) {
-          console.error("Erro ao buscar medicamentos:", err);
-          if (isActive) setMedicines([]);
-        } finally {
-          if (isActive) setLoading(false);
-        }
-      };
-
-      fetchMedicines();
+      if (isActive) fetchMedicines();
       return () => {
         isActive = false;
       };
     }, [token])
   );
+
+  const confirmTaken = (med: Medication) => {
+    Alert.alert(
+      "Confirmar medicação",
+      `Você tomou ${med.name}?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sim, tomei",
+          onPress: async () => {
+            try {
+              const now = new Date().toISOString();
+
+              const response = await fetch(
+                `${env.BASE_URL}/medication/treatment-medication/update-progress`,
+                {
+                  method: "PATCH",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    treatmentId: med.treatmentId,
+                    medicationId: med.medicationId,
+                    progress: {
+                      lastTaken: now,
+                      takenQuantity: (med.takenQuantity ?? 0) + 1,
+                    }, 
+                  }),
+                }
+              );
+
+              if (!response.ok) {
+                throw new Error("Falha ao atualizar progresso");
+              }
+
+              await fetchMedicines(); 
+            } catch (error) {
+              console.error("Erro ao atualizar progresso:", error);
+              Alert.alert("Erro", "Não foi possível atualizar o progresso.");
+            }
+          },
+        },
+      ]
+    );
+  };
 
   function getGreeting() {
     const hour = new Date().getHours();
@@ -135,14 +175,10 @@ export default function Initial() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.text }]}>
-              {getGreeting()}!
-            </Text>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <TouchableOpacity onPress={logout}>
-                <MaterialCommunityIcons name="logout" size={24} color={theme.text} />
-              </TouchableOpacity>
-            </View>
+            <Text style={[styles.title, { color: theme.text }]}>{getGreeting()}!</Text>
+            <TouchableOpacity onPress={logout}>
+              <MaterialCommunityIcons name="logout" size={24} color={theme.text} />
+            </TouchableOpacity>
           </View>
 
           {medicines.length === 0 ? (
@@ -158,63 +194,54 @@ export default function Initial() {
               </Text>
 
               <View style={[localStyles.card, { backgroundColor: theme.background }]}>
-               {medicines.map((med, idx) => {
-  const baseDate = med.lastTaken ? new Date(med.lastTaken) : new Date();
+                {medicines.map((med, idx) => {
+                  const nextTake = med.nextTakeAt ? new Date(med.nextTakeAt) : null;
+                  const nextTimeFormatted = nextTake
+                    ? nextTake.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                    : null;
 
-  const nextAlert = new Date(
-    baseDate.getTime() + med.alertPeriodInHours * 60 * 60 * 1000
-  );
-
-  const isPast = nextAlert.getTime() <= Date.now();
-
-  const nextTimeFormatted = nextAlert.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  return (
-    <View
-      key={`${med.medicationId}-${med.treatmentId ?? idx}`}
-      style={[
-        localStyles.row,
-        {
-          borderBottomWidth: idx !== medicines.length - 1 ? 0.2 : 0,
-          borderBottomColor: theme.text,
-        },
-      ]}
-    >
-      <View>
-        <Text style={{ color: theme.text, fontWeight: "600" }}>
-          {med.name}
-        </Text>
-
-        {med.dose && (
-          <Text style={{ color: theme.text, opacity: 0.7 }}>
-            Dose: {med.dose}
-          </Text>
-        )}
-
-        {med.takenQuantity != null && med.totalQuantity != null && (
-          <Text style={{ color: theme.text, opacity: 0.6 }}>
-            Progresso: {med.takenQuantity}/{med.totalQuantity}
-          </Text>
-        )}
-
-        {!isPast ? (
-          <Text style={{ color: theme.text, opacity: 0.6 }}>
-            Próximo: {nextTimeFormatted}
-          </Text>
-        ) : (
-          <Text style={{ color: theme.text, opacity: 0.4 }}>
-            Nenhum horário futuro
-          </Text>
-        )}
-      </View>
-    </View>
-  );
-})}
-
-
+                  return (
+                    <TouchableOpacity
+                      key={`${med.medicationId}-${med.treatmentId ?? idx}`}
+                      onPress={() => confirmTaken(med)}
+                    >
+                      <View
+                        style={[
+                          localStyles.row,
+                          {
+                            borderBottomWidth: idx !== medicines.length - 1 ? 0.2 : 0,
+                            borderBottomColor: theme.text,
+                          },
+                        ]}
+                      >
+                        <View>
+                          <Text style={{ color: theme.text, fontWeight: "600" }}>
+                            {med.name}
+                          </Text>
+                          {med.dose && (
+                            <Text style={{ color: theme.text, opacity: 0.7 }}>
+                              Dose: {med.dose}
+                            </Text>
+                          )}
+                          {med.takenQuantity != null && med.totalQuantity != null && (
+                            <Text style={{ color: theme.text, opacity: 0.6 }}>
+                              Progresso: {med.takenQuantity}/{med.totalQuantity}
+                            </Text>
+                          )}
+                          {nextTimeFormatted ? (
+                            <Text style={{ color: theme.text, opacity: 0.6 }}>
+                              Próximo: {nextTimeFormatted}
+                            </Text>
+                          ) : (
+                            <Text style={{ color: theme.text, opacity: 0.4 }}>
+                              Nenhum horário definido
+                            </Text>
+                          )}
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
           )}
