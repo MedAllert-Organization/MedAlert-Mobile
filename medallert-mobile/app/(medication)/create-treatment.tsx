@@ -236,7 +236,7 @@ export default function TreatmentsScreen() {
     <Background>
       <BackButton />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Subtitle>💊 Criar novo tratamento</Subtitle>
+        <Subtitle>Criar novo tratamento</Subtitle>
 
         <Text style={styles.label}>Nome</Text>
         <TextField
@@ -370,11 +370,11 @@ export default function TreatmentsScreen() {
 
         <ButtonPrimary
           onPress={handleAddTreatment}
-          title="💾 Criar tratamento"
+          title="Criar tratamento"
         />
 
         <View style={{ marginTop: 32 }}>
-          <Subtitle>🧾 Lista de tratamentos</Subtitle>
+          <Subtitle>Lista de tratamentos</Subtitle>
           {treatments.length === 0 ? (
             <Text style={{ textAlign: "center", marginTop: 12, opacity: 0.7 }}>
               Nenhum tratamento cadastrado ainda.

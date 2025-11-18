@@ -169,77 +169,90 @@ export default function CreateMedication() {
   }
 
   return (
-   
+
     <Background>
-  <View>
-     <BackButton />
-    </View>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-    
-            }}
-          >
-            <View style={{ paddingBottom: 20 }}>
-             
-              <Subtitle>💊 Medicamentos</Subtitle>
+      <View>
+        <BackButton />
+      </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
 
-              <View style={{ gap: 10, marginTop: 12 }}>
-                <Text style={styles.label}>Nome</Text>
-                <TextField
-                  value={medicationName}
-                  onChangeText={setMedicationName}
-                  placeholder="Ex: Paracetamol"
-                />
+        }}
+      >
+        <View style={{ paddingBottom: 20 }}>
 
-                <Text style={styles.label}>Descrição</Text>
-                <TextField
-                  value={medicationDesc}
-                  onChangeText={setMedicationDesc}
-                  placeholder="Ex: Para dor de cabeça..."
-                  multiline
-                  inputStyle={{ height: 160, textAlignVertical: "top" }}
-                />
+          <Subtitle>💊 Medicamentos</Subtitle>
+
+          <View style={{ gap: 10, marginTop: 12 }}>
+            <Text style={styles.label}>Nome</Text>
+            <TextField
+              value={medicationName}
+              onChangeText={setMedicationName}
+              placeholder="Ex: Paracetamol"
+            />
+
+            <Text style={styles.label}>Descrição</Text>
+            <TextField
+              value={medicationDesc}
+              onChangeText={setMedicationDesc}
+              placeholder="Ex: Para dor de cabeça..."
+              multiline
+              inputStyle={{ height: 160, textAlignVertical: "top" }}
+            />
 
 
-                <DateTimePickerModal
-                  isVisible={isMedicationDateVisible}
-                  mode="date"
-                  onConfirm={handleMedicationEndConfirm}
-                  onCancel={hideDatePicker}
-                />
+            <DateTimePickerModal
+              isVisible={isMedicationDateVisible}
+              mode="date"
+              onConfirm={handleMedicationEndConfirm}
+              onCancel={hideDatePicker}
+            />
 
-                <ButtonPrimary
-                  onPress={handleCreateMedication}
-                  title="💾 Criar Medicamento"
-                />
-              </View>
-            </View>
+            <ButtonPrimary
+              onPress={handleCreateMedication}
+              title="💾 Criar Medicamento"
+            />
+          </View>
+        </View>
 
-            <View style={{ marginTop: 16 }}>
-              <Subtitle>Lista de medicamentos</Subtitle>
+        <View style={{ marginTop: 16 }}>
+          <Subtitle>Lista de medicamentos</Subtitle>
 
-              {meds.length === 0 ? (
-                <Text style={{ textAlign: "center", marginTop: 12, opacity: 0.7 }}>
-                  Nenhum medicamento cadastrado ainda.
-                </Text>
-              ) : (
-                meds.map((item) => (
-                  <MedicationItem
-                    key={item.medicationId}
-                    name={item.name ?? ""}
-                    onPress={() => deleteMedication(item.medicationId)}
-                  />
-                ))
-              )}
-            </View>
+          {meds.length === 0 ? (
+            <Text style={{ textAlign: "center", marginTop: 12, opacity: 0.7 }}>
+              Nenhum medicamento cadastrado ainda.
+            </Text>
+          ) : (
+            meds.map((item) => (
+              <MedicationItem
+                key={item.medicationId}
+                name={item.name ?? ""}
+                onPress={async () => Alert.alert(
+                  "Confirmar exclusão",
+                  `Deseja realmente apagar o medicamento "${item.name}"?`,
+                  [
+                    { text: "Cancelar", style: "cancel" },
+                    {
+                      text: "Apagar",
+                      style: "destructive",
+                      onPress: () => deleteMedication(item.medicationId),
+                    },
+                  ]
+                )
+                }
+              />
 
-            <View style={{ marginTop: 24 }}>
-              <LinkText onPress={() => router.push("/tabs/treatment")}>
-                ➡️ Ver Tratamentos
-              </LinkText>
-            </View>
-          </ScrollView>
+            ))
+          )}
+        </View>
+
+        <View style={{ marginTop: 24 }}>
+          <LinkText onPress={() => router.push("/tabs/treatment")}>
+            Ver Tratamentos
+          </LinkText>
+        </View>
+      </ScrollView>
     </Background>
   );
 }

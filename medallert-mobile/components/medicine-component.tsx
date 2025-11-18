@@ -12,10 +12,9 @@ import {
 
 type Props = {
   medicines: Medication[];
-  title: string;
 };
 
-export default function MedicineComponent({ medicines, title }: Props) {
+export default function MedicineComponent({ medicines }: Props) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
@@ -28,10 +27,6 @@ export default function MedicineComponent({ medicines, title }: Props) {
 
   return (
     <View>
-      {title ? (
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>{title}</Text>
-      ) : null}
-
       <View style={[localStyles.card, { backgroundColor: theme.background }]}>
         {medicines?.length ? (
           medicines.map((med, idx) => (

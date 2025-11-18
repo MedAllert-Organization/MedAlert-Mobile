@@ -99,7 +99,7 @@ export default function TreatmentView() {
 
         <ScrollView contentContainerStyle={{ paddingBottom: 0 }}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.text }]}>Tratamento</Text>
+            <Text style={[styles.title, { color: theme.text }]}>Meus tratamentos</Text>
           </View>
 
           {treatments.length === 0 ? (

@@ -139,7 +139,7 @@ export default function Initial() {
                     progress: {
                       lastTaken: now,
                       takenQuantity: (med.takenQuantity ?? 0) + 1,
-                    }, 
+                    },
                   }),
                 }
               );
@@ -148,7 +148,7 @@ export default function Initial() {
                 throw new Error("Falha ao atualizar progresso");
               }
 
-              await fetchMedicines(); 
+              await fetchMedicines();
             } catch (error) {
               console.error("Erro ao atualizar progresso:", error);
               Alert.alert("Erro", "Não foi possível atualizar o progresso.");

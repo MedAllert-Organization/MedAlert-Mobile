@@ -87,7 +87,7 @@ export default function MedicationView() {
       ) : (
         <View style={{ paddingBottom: 0 }}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.text }]}>Medicação</Text>
+            <Text style={[styles.title, { color: theme.text }]}>Meus medicamentos</Text>
           </View>
 
           {medicines.length === 0 ? (
@@ -102,18 +102,18 @@ export default function MedicationView() {
                   Nenhuma medicação foi encontrada
                 </Text>
               </View>
-              <AddMedicationButton />
+
             </>
           ) : (
             <>
               <MedicineComponent
                 medicines={medicines}
-                title="Meus Medicamentos"
+               
               />
-              <AddMedicationButton />
+
             </>
           )}
-      
+          <AddMedicationButton />
         </View>
       )}
     </Background>

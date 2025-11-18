@@ -45,7 +45,7 @@ export default function TreatmentDetailScreen() {
         if (!res.ok) throw new Error("Erro ao buscar tratamento");
 
         const data = await res.json();
-        console.log("🔹 Tratamento recebido:", data);
+        console.log("Tratamento recebido:", data);
 
         setTreatment(data.treatment ?? data);
       } catch (err) {

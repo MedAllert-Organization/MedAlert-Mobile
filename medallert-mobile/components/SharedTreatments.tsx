@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { Text, View, StyleSheet, FlatList, Alert, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, FlatList, Alert, TouchableOpacity, useColorScheme } from "react-native";
 import { router } from "expo-router";
 import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
 import styles from "@/utils/styles";
+import Colors from "@/constants/Colors";
 
 interface SharedTreatmentsResponse {
   success: boolean;
@@ -30,6 +31,8 @@ interface User {
 
 export function SharedTreatments() {
   const [treatments, setTreatments] = useState<TreatmentShare[]>([]);
+    const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
 
   const listSharedTreatments = useCallback(async (): Promise<void> => {
     try {
@@ -67,10 +70,10 @@ export function SharedTreatments() {
 
   return (
     <View>
-      <Text style={styles.sectionTitle}>Tratamentos compartilhados comigo</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Tratamentos compartilhados comigo</Text>
       {treatments.length === 0 ? (
         <View style={{ alignItems: "center", padding: 2 }}>
-          <Text style={{ opacity: 0.75 }}>
+          <Text style={{ opacity: 0.75, color: theme.text  }}>
             Nenhum tratamento foi compartilhado com você.
           </Text>
         </View>
@@ -83,15 +86,15 @@ export function SharedTreatments() {
               style={localStyles.card}
               onPress={() => handlePress(item.treatment.treatmentId)}
             >
-              <Text style={localStyles.userInfo}>
+              <Text style={[localStyles.userInfo, { color: theme.text }]}>
                 Compartilhado por: {item.treatment.user.fullName}
               </Text>
               <View style={{ gap: 4 }}>
-                <Text style={localStyles.treatmentName}>
+                <Text style={[localStyles.treatmentName, { color: theme.text }]}>
                   {item.treatment.name}
                 </Text>
                 {item.treatment.description && (
-                  <Text style={localStyles.treatmentDesc}>
+                  <Text style={[[localStyles.treatmentDesc, { color: theme.text }]]}>
                     {item.treatment.description}
                   </Text>
                 )}
