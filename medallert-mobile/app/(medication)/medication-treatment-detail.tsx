@@ -10,7 +10,7 @@ import {
 import Colors from "@/constants/Colors";
 import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
-import { Medication } from "./(medication)/create-medication";
+import { Medication } from "./create-medication";
 
 interface Props {
   medication: Medication;
@@ -85,9 +85,9 @@ export default function MedicineTreatmentDetail({ medication }: Props) {
       )}
 
       <View style={styles.infoBox}>
-        {medication.alertPeriodInHours != null && (
+        {medication.alertPeriodInMinutes != null && (
           <Text style={[styles.infoText, { color: theme.text }]}>
-            Intervalo: {medication.alertPeriodInHours}h
+            Intervalo: {medication.alertPeriodInMinutes}min
           </Text>
         )}
 
@@ -114,7 +114,7 @@ function getNextDoseTime(med: Medication) {
   if (!med.lastTaken) return "Ainda não tomou";
 
   const last = new Date(med.lastTaken);
-  const periodMs = (med.alertPeriodInHours ?? 0) * 60 * 60 * 1000;
+  const periodMs = (med.alertPeriodInMinutes ?? 0) * 60 * 1000;
   const nextDose = new Date(last.getTime() + periodMs);
   const now = new Date();
 

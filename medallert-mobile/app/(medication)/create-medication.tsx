@@ -36,7 +36,7 @@ export type Medication = {
   description: string | null;
   visualTypeId: string | null;
   soundTypeId: string | null;
-  alertPeriodInHours: number | null;
+  alertPeriodInMinutes: number | null;
   takenQuantity: number | null;
   totalQuantity: number | null;
   createdAt: string | null;
@@ -51,7 +51,7 @@ type CreateMedication = {
   treatmentId: string | null;
   visualTypeId: string | null;
   soundTypeId: string | null;
-  alertPeriodInHours: number;
+  alertPeriodInMinutes: number;
   endTreatmentAt: Date | null;
 };
 
@@ -154,7 +154,7 @@ export default function CreateMedication() {
       name: medicationName,
       dose: medicationDose,
       description: medicationDesc,
-      alertPeriodInHours: medicationPeriod,
+      alertPeriodInMinutes: medicationPeriod,
       endTreatmentAt: medicationEndDate,
       treatmentId: null,
       visualTypeId: null,

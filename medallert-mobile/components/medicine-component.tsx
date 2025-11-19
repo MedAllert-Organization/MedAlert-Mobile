@@ -70,9 +70,9 @@ export default function MedicineComponent({ medicines }: Props) {
               </View>
 
               <View style={{ alignItems: "flex-end" }}>
-                {typeof med.alertPeriodInHours === "number" && (
+                {typeof med.alertPeriodInMinutes === "number" && (
                   <Text style={{ color: theme.text }}>
-                    A cada {med.alertPeriodInHours}h
+                    A cada {med.alertPeriodInMinutes}min
                   </Text>
                 )}
 

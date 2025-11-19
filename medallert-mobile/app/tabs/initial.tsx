@@ -17,7 +17,6 @@ import env from "@/config/env";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import Background from "@/components/Background";
-import { errors } from "jose";
 
 export type Medication = {
   medicationId: string;
@@ -28,7 +27,7 @@ export type Medication = {
   description?: string;
   visualTypeId?: string | null;
   soundTypeId?: string | null;
-  alertPeriodInHours: number;
+  alertPeriodInMinutes?: number;
   endTreatmentAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
@@ -36,7 +35,25 @@ export type Medication = {
   totalQuantity: number | null;
   lastTaken?: string | null;
   nextTakeAt?: string | null;
+  timezone?: string;
 };
+
+function convertToUserTimezone(dateString: string, timezone?: string) {
+  try {
+    const date = new Date(dateString);
+
+    const tz = timezone || "UTC";
+
+    return new Intl.DateTimeFormat("pt-BR", {
+      timeZone: tz,
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
+  } catch {
+    return null;
+  }
+}
+
 
 export default function Initial() {
   const { logout, token } = useAuth();
@@ -91,10 +108,21 @@ export default function Initial() {
       }
 
       const data = await response.json();
-      const meds = Array.isArray(data?.medications) ? data.medications : [];
 
-      setMedicines(meds);
-      await updateNotifications(meds);
+      const meds = Array.isArray(data?.medications?.medications)
+        ? data.medications.medications
+        : [];
+
+      const timezone = data?.medications?.timezone ?? "America/Sao_Paulo";
+
+      const medsWithTimezone = meds.map((m: any) => ({
+        ...m,
+        timezone: m.timezone || timezone,
+      }));
+
+      setMedicines(medsWithTimezone);
+
+      await updateNotifications(medsWithTimezone);
     } catch (err) {
       console.error("Erro ao buscar medicamentos:", err);
       setMedicines([]);
@@ -102,6 +130,7 @@ export default function Initial() {
       setLoading(false);
     }
   };
+
 
   useFocusEffect(
     useCallback(() => {
@@ -166,6 +195,7 @@ export default function Initial() {
     return "Boa noite";
   }
 
+
   return (
     <Background>
       {loading ? (
@@ -175,7 +205,9 @@ export default function Initial() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.text }]}>{getGreeting()}!</Text>
+            <Text style={[styles.title, { color: theme.text }]}>
+              {getGreeting()}!
+            </Text>
             <TouchableOpacity onPress={logout}>
               <MaterialCommunityIcons name="logout" size={24} color={theme.text} />
             </TouchableOpacity>
@@ -195,21 +227,22 @@ export default function Initial() {
 
               <View style={[localStyles.card, { backgroundColor: theme.background }]}>
                 {medicines.map((med, idx) => {
-                  const nextTake = med.nextTakeAt ? new Date(med.nextTakeAt) : null;
-                  const nextTimeFormatted = nextTake
-                    ? nextTake.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                    : null;
+                  const nextFormatted =
+                    med.nextTakeAt && med.timezone
+                      ? convertToUserTimezone(med.nextTakeAt, med.timezone)
+                      : null;
 
                   return (
                     <TouchableOpacity
-                      key={`${med.medicationId}-${med.treatmentId ?? idx}`}
+                      key={`${med.medicationId}-${med.treatmentId}-${idx}`}
                       onPress={() => confirmTaken(med)}
                     >
                       <View
                         style={[
                           localStyles.row,
                           {
-                            borderBottomWidth: idx !== medicines.length - 1 ? 0.2 : 0,
+                            borderBottomWidth:
+                              idx !== medicines.length - 1 ? 0.2 : 0,
                             borderBottomColor: theme.text,
                           },
                         ]}
@@ -218,19 +251,23 @@ export default function Initial() {
                           <Text style={{ color: theme.text, fontWeight: "600" }}>
                             {med.name}
                           </Text>
+
                           {med.dose && (
                             <Text style={{ color: theme.text, opacity: 0.7 }}>
                               Dose: {med.dose}
                             </Text>
                           )}
-                          {med.takenQuantity != null && med.totalQuantity != null && (
+
+                          {med.takenQuantity != null &&
+                            med.totalQuantity != null && (
+                              <Text style={{ color: theme.text, opacity: 0.6 }}>
+                                Progresso: {med.takenQuantity}/{med.totalQuantity}
+                              </Text>
+                            )}
+
+                          {nextFormatted ? (
                             <Text style={{ color: theme.text, opacity: 0.6 }}>
-                              Progresso: {med.takenQuantity}/{med.totalQuantity}
-                            </Text>
-                          )}
-                          {nextTimeFormatted ? (
-                            <Text style={{ color: theme.text, opacity: 0.6 }}>
-                              Próximo: {nextTimeFormatted}
+                              Próximo: {nextFormatted}
                             </Text>
                           ) : (
                             <Text style={{ color: theme.text, opacity: 0.4 }}>

@@ -50,7 +50,7 @@ type CreateTreatment = {
   medications: {
     medicationId: string;
     dose: string;
-    alertPeriodInHours: number;
+    alertPeriodInMinutes: number;
     lastTaken: null;
     takenQuantity: number;
     totalQuantity: number;
@@ -63,7 +63,7 @@ export default function TreatmentsScreen() {
   const [selectedMedications, setSelectedMedications] = useState<string[]>([]);
   const [medicationsData, setMedicationsData] = useState<Record<
     string,
-    { dose: string; totalQuantity: string; alertPeriodInHours: string }
+    { dose: string; totalQuantity: string; alertPeriodInMinutes: string }
   >>({});
 
   const [newTreatmentName, setNewTreatmentName] = useState("");
@@ -168,13 +168,13 @@ export default function TreatmentsScreen() {
 
     setMedicationsData((prev) => {
       if (prev[id]) return prev;
-      return { ...prev, [id]: { dose: "", totalQuantity: "", alertPeriodInHours: "" } };
+      return { ...prev, [id]: { dose: "", totalQuantity: "", alertPeriodInMinutes: "" } };
     });
   }
 
   function updateMedicationData(
     id: string,
-    field: "dose" | "totalQuantity" | "alertPeriodInHours",
+    field: "dose" | "totalQuantity" | "alertPeriodInMinutes",
     value: string
   ) {
     setMedicationsData((prev) => ({
@@ -199,9 +199,9 @@ export default function TreatmentsScreen() {
       return {
         medicationId: id,
         dose: medData?.dose || "",
-        alertPeriodInHours:
-          parseInt(medData?.alertPeriodInHours || "", 10) ||
-          (medFromList?.alertPeriodInHours || 0),
+        alertPeriodInMinutes:
+          parseInt(medData?.alertPeriodInMinutes || "", 10) ||
+          (medFromList?.alertPeriodInMinutes || 0),
         lastTaken: null,
         takenQuantity: 0,
         totalQuantity: parseInt(medData?.totalQuantity || "", 10),
@@ -216,11 +216,10 @@ export default function TreatmentsScreen() {
       medications: medicationsPayload,
     });
 
-    // 🔔 agenda lembretes
     medicationsPayload.forEach((m) =>
       scheduleMedicationReminder(
         meds.find((med) => med.medicationId === m.medicationId)?.name || "",
-        m.alertPeriodInHours,
+        m.alertPeriodInMinutes,
       ),
     );
 
@@ -309,10 +308,10 @@ export default function TreatmentsScreen() {
               />
 
               <TextField
-                placeholder="Alertar a cada X horas"
-                value={medData?.alertPeriodInHours || ""}
+                placeholder="Alertar a cada X minutos"
+                value={medData?.alertPeriodInMinutes || ""}
                 keyboardType="numeric"
-                onChangeText={(text) => updateMedicationData(id, "alertPeriodInHours", text)}
+                onChangeText={(text) => updateMedicationData(id, "alertPeriodInMinutes", text)}
               />
             </View>
           );

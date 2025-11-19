@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -23,11 +23,14 @@ import MedicineTreatmentDetail from "./medication-treatment-detail";
 
 export default function TreatmentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
   const [treatment, setTreatment] = useState<Treatment | null>(null);
   const [loading, setLoading] = useState(true);
+
   const [shareVisible, setShareVisible] = useState(false);
   const [email, setEmail] = useState("");
 
@@ -45,8 +48,6 @@ export default function TreatmentDetailScreen() {
         if (!res.ok) throw new Error("Erro ao buscar tratamento");
 
         const data = await res.json();
-        console.log("Tratamento recebido:", data);
-
         setTreatment(data.treatment ?? data);
       } catch (err) {
         Alert.alert("Erro", "Não foi possível carregar o tratamento.");
@@ -58,6 +59,28 @@ export default function TreatmentDetailScreen() {
 
     fetchTreatment();
   }, [id]);
+
+  async function deleteTreatment() {
+    try {
+      const token = await getToken();
+
+      const res = await fetch(`${env.BASE_URL}/medication/treatment/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro ao apagar tratamento");
+
+      Alert.alert("Sucesso", "Tratamento apagado.");
+      router.replace("/tabs/treatment");
+    } catch (e) {
+      Alert.alert("Erro", "Houve um erro ao apagar o tratamento!");
+      console.log(e);
+    }
+  }
 
   async function handleShare() {
     if (!email.trim()) {
@@ -153,7 +176,27 @@ export default function TreatmentDetailScreen() {
         )}
       </ScrollView>
 
-      {/* MODAL DE COMPARTILHAMENTO */}
+      {/* BOTÃO DELETAR */}
+      <View style={{ marginTop: 20 }}>
+        <TouchableOpacity
+          onPress={() =>
+            Alert.alert(
+              "Confirmar exclusão",
+              "Tem certeza que deseja apagar este tratamento?",
+              [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Apagar", style: "destructive", onPress: deleteTreatment },
+              ]
+            )
+          }
+        >
+          <Text style={{ fontSize: 16, fontWeight: "600", color: "red" }}>
+            Deletar tratamento
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* MODAL DE COMPARTILHAR */}
       <Modal visible={shareVisible} transparent animationType="fade">
         <View style={localStyles.modalOverlay}>
           <View
@@ -227,11 +270,6 @@ const localStyles = StyleSheet.create({
     padding: 12,
     marginBottom: 24,
     backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
   },
   center: {
     flex: 1,
@@ -261,6 +299,7 @@ const localStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 8,
+    marginTop: 20,
   },
   modalButton: {
     paddingHorizontal: 14,
