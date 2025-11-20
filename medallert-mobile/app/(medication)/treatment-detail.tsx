@@ -34,6 +34,31 @@ export default function TreatmentDetailScreen() {
   const [shareVisible, setShareVisible] = useState(false);
   const [email, setEmail] = useState("");
 
+  async function resetTreatment() {
+    try {
+      const token = await getToken();
+
+      const res = await fetch(`${env.BASE_URL}/medication/treatment/${id}/reset`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro ao resetar tratamento");
+
+      const data = await res.json();
+      setTreatment(data.treatment ?? data);
+
+      Alert.alert("Sucesso", "Tratamento resetado.");
+
+    } catch (e) {
+      Alert.alert("Erro", "Houve um erro ao resetar o tratamento!");
+      console.log(e);
+    }
+  }
+
   useEffect(() => {
     const fetchTreatment = async () => {
       try {
@@ -176,7 +201,25 @@ export default function TreatmentDetailScreen() {
         )}
       </ScrollView>
 
-      {/* BOTÃO DELETAR */}
+      <View style={{ marginTop: 10 }}>
+        <TouchableOpacity
+          onPress={() =>
+            Alert.alert(
+              "Confirmar reset",
+              "Deseja realmente resetar este tratamento?\nIsso irá zerar horários, doses tomadas e recalcular tudo.",
+              [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Resetar", style: "destructive", onPress: resetTreatment },
+              ]
+            )
+          }
+        >
+          <Text style={{ fontSize: 16, fontWeight: "600", color: theme.tint }}>
+            Resetar tratamento
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={{ marginTop: 20 }}>
         <TouchableOpacity
           onPress={() =>
@@ -196,7 +239,11 @@ export default function TreatmentDetailScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* MODAL DE COMPARTILHAR */}
+
+
+
+
+
       <Modal visible={shareVisible} transparent animationType="fade">
         <View style={localStyles.modalOverlay}>
           <View
