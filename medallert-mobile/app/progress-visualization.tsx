@@ -80,6 +80,83 @@ export default function ProgressVisualization() {
     return "#F44336";
   };
 
+  const handleGenerateReport = async () => {
+    try {
+      Alert.alert(
+        "Escolha o Período",
+        "Selecione o período do relatório:",
+        [
+          {
+            text: "Cancelar",
+            style: "cancel",
+          },
+          {
+            text: "Semanal",
+            onPress: () => downloadReport("Weekly")
+          },
+          {
+            text: "Mensal",
+            onPress: () => downloadReport("Monthly")
+          }
+        ]
+      );
+    } catch (error) {
+      console.error("Erro ao gerar relatório:", error);
+      Alert.alert("Erro", "Não foi possível gerar o relatório");
+    }
+  };
+
+  const downloadReport = async (period: "Weekly" | "Monthly") => {
+    try {
+      setIsGenerating(true);
+
+      const token = await getToken();
+
+      const response = await fetch(`${env.BASE_URL}/medication/report/${period}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao gerar relatório');
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+
+      const periodLabel = period === "Weekly" ? "semanal" : "mensal";
+      const fileName = `relatorio_${periodLabel}_${Date.now()}.pdf`;
+
+      const file = new File(fileName);
+
+      await file.create();
+      await file.write(uint8Array);
+
+      const fileUri = file.uri;
+
+      const isAvailable = await Sharing.isAvailableAsync();
+
+      if (isAvailable) {
+        await Sharing.shareAsync(fileUri, {
+          mimeType: 'application/pdf',
+          dialogTitle: 'Salvar Relatório',
+          UTI: 'com.adobe.pdf'
+        });
+
+        Alert.alert("Sucesso", "Relatório gerado com sucesso!");
+      } else {
+        Alert.alert("Sucesso", `Relatório salvo em: ${fileUri}`);
+      }
+    } catch (error) {
+      console.error("Erro ao baixar relatório:", error);
+      Alert.alert("Erro", "Houve um erro ao gerar o relatório!");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', {
@@ -198,6 +275,14 @@ export default function ProgressVisualization() {
           </View>
         )}
       </ScrollView>
+
+      <View style={styles.fixedButtonContainer}>
+        <ButtonPrimary
+          title={isGenerating ? "Gerando..." : "📄 Gerar Relatório PDF"}
+          onPress={handleGenerateReport}
+          disabled={isGenerating}
+        />
+      </View>
     </Background>
   );
 }
