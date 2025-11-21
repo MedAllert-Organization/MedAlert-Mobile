@@ -14,7 +14,7 @@ import {
   Modal,
   FlatList,
 } from "react-native";
-import { getToken } from "@/providers/auth-provider";
+import { getToken, useAuth } from "@/providers/auth-provider";
 
 type Timezone = {
   id: string;
@@ -28,8 +28,10 @@ export default function Settings() {
   const [currentTimezone, setCurrentTimezone] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const { logout, token } = useAuth();
 
   // ---------------------------------------
   // Buscar timezone atual do usuário
@@ -69,8 +71,9 @@ export default function Settings() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ timezoneName }),
-      });
+        // body: JSON.stringify({ timezoneName }),
+      }
+      );
 
       if (!res.ok) throw new Error("Falha ao atualizar timezone");
 
@@ -110,7 +113,7 @@ export default function Settings() {
         </Text>
       </View>
 
-   
+
       <TouchableOpacity
         style={{
           padding: 14,
@@ -128,6 +131,9 @@ export default function Settings() {
         </Text>
       </TouchableOpacity>
 
+      <DeleteButton title="Sair da Conta" onPress={logout} />
+
+
       <DeleteButton
         title="Apagar Compartilhamentos"
         onPress={() =>
@@ -136,7 +142,7 @@ export default function Settings() {
             "Deseja realmente remover os compartilhamentos?",
             [
               { text: "Cancelar", style: "cancel" },
-              { text: "Apagar", style: "destructive", onPress: () => {} },
+              { text: "Apagar", style: "destructive", onPress: () => { } },
             ]
           )
         }

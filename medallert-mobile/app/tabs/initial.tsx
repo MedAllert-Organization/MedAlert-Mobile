@@ -208,9 +208,7 @@ export default function Initial() {
             <Text style={[styles.title, { color: theme.text }]}>
               {getGreeting()}!
             </Text>
-            <TouchableOpacity onPress={logout}>
-              <MaterialCommunityIcons name="logout" size={24} color={theme.text} />
-            </TouchableOpacity>
+
           </View>
 
           {medicines.length === 0 ? (
