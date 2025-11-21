@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback } from "react";
 import { getToken } from "@/providers/auth-provider";
 import env from "@/config/env";
 import { router } from "expo-router";
+import { BackButton } from "@/components/BackButton";
 
 type TreatmentMedication = {
   medicationId: string;
@@ -168,31 +169,34 @@ export default function ProgressVisualization() {
 
   return (
     <Background>
-      <ScrollView contentContainerStyle={{ paddingBottom: 120, alignItems: "center", paddingHorizontal: 16 }}>
-        <Text
-          style={[
-            styles.titleMain,
-            {
-              color: theme.tint,
-              textShadowColor: 'black',
-              textShadowOffset: { width: -1, height: 1 }
-            }
-          ]}
-        >
-          📊 Progresso
-        </Text>
+      <BackButton />
 
-        <Text
-          style={[
-            styles.titleSubtitle,
-            {
-              textShadowColor: 'black',
-              textShadowOffset: { width: -1, height: 1 }
-            }
-          ]}
-        >
-          Acompanhe seus tratamentos
-        </Text>
+      <Text
+        style={[
+          styles.titleMain,
+          {
+            color: theme.tint,
+            textShadowColor: 'black',
+            textShadowOffset: { width: -1, height: 1 }
+          }
+        ]}
+      >
+        📊 Progresso
+      </Text>
+
+      <Text
+        style={[
+          styles.titleSubtitle,
+          {
+            textShadowColor: 'black',
+            textShadowOffset: { width: -1, height: 1 }
+          }
+        ]}
+      >
+        Acompanhe seus tratamentos
+      </Text>
+
+      <ScrollView contentContainerStyle={{ paddingBottom: 120, alignItems: "center", paddingHorizontal: 16 }}>
 
         {isLoading ? (
           <ActivityIndicator size="large" color={theme.tint} style={{ marginTop: 40 }} />

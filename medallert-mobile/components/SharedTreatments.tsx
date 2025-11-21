@@ -70,14 +70,14 @@ export function SharedTreatments() {
 
   return (
     <View>
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>Tratamentos compartilhados comigo</Text>
+     
       {treatments.length === 0 ? (
-        <View style={{ alignItems: "center", padding: 2 }}>
-          <Text style={{ opacity: 0.75, color: theme.text  }}>
-            Nenhum tratamento foi compartilhado com você.
-          </Text>
-        </View>
+        <>
+       
+        </>
       ) : (
+        <>
+         <Text style={[styles.sectionTitle, { color: theme.text }]}>Tratamentos compartilhados comigo</Text>
         <FlatList
           data={treatments}
           keyExtractor={(item) => item.treatment.treatmentId}
@@ -94,7 +94,7 @@ export function SharedTreatments() {
                   {item.treatment.name}
                 </Text>
                 {item.treatment.description && (
-                  <Text style={[[localStyles.treatmentDesc, { color: theme.text }]]}>
+                  <Text style={[localStyles.treatmentDesc, { color: theme.text }]}>
                     {item.treatment.description}
                   </Text>
                 )}
@@ -102,6 +102,7 @@ export function SharedTreatments() {
             </TouchableOpacity>
           )}
         />
+        </>
       )}
     </View>
   );

@@ -58,14 +58,12 @@ export default function Settings() {
     fetchTimezones();
   }, []);
 
-  // ---------------------------------------
-  // Alterar timezone no backend
-  // ---------------------------------------
+
   const updateTimezone = async (timezoneName: string) => {
     try {
       const token = await getToken();
 
-      const res = await fetch(`${env.BASE_URL}/user/update-timezone`, {
+      const res = await fetch(`${env.BASE_URL}/user/timezone`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -85,9 +83,6 @@ export default function Settings() {
     }
   };
 
-  // ---------------------------------------
-  // Deletar conta
-  // ---------------------------------------
   const deleteAccount = useCallback(async () => {
     try {
       const token = await getToken();
@@ -115,7 +110,7 @@ export default function Settings() {
         </Text>
       </View>
 
-      {/* Mostrar timezone atual */}
+   
       <TouchableOpacity
         style={{
           padding: 14,
@@ -149,7 +144,7 @@ export default function Settings() {
 
       <DeleteButton title="Apagar Conta" onPress={deleteAccount} />
 
-      {/* Modal para escolher timezone */}
+
       <Modal visible={modalVisible} animationType="slide">
         <View style={{ flex: 1, padding: 20 }}>
           <Text

@@ -115,48 +115,62 @@ export default function TreatmentView() {
 
           ) : (
             <>
-             
-                <View style={[localStyles.card, { backgroundColor: theme.background }]}>
-                  {treatments.map((trea, idx) => (
-                    <TouchableOpacity
-                      key={trea.treatmentId}
-                      onPress={() => handlePress(trea.treatmentId)}
-                      style={[
-                        localStyles.row,
-                        {
-                          borderBottomWidth: idx !== treatments.length - 1 ? 0.2 : 0,
-                          borderBottomColor: theme.text,
-                        },
-                      ]}
-                    >
-                      <View>
-                        <Text style={{ color: theme.text, fontWeight: "600" }}>
-                          {trea.name}
-                        </Text>
 
-                        {trea.description && (
-                          <Text
-                            style={{ color: theme.text, opacity: 0.7, fontSize: 13 }}
-                            numberOfLines={1}
-                          >
-                            {trea.description}
-                          </Text>
-                        )}
+              <View style={[localStyles.card, { backgroundColor: theme.background }]}>
+                {treatments.map((trea, idx) => (
+                  <TouchableOpacity
+                    key={trea.treatmentId}
+                    onPress={() => handlePress(trea.treatmentId)}
+                    style={[
+                      localStyles.row,
+                      {
+                        borderBottomWidth: idx !== treatments.length - 1 ? 0.2 : 0,
+                        borderBottomColor: theme.text,
+                      },
+                    ]}
+                  >
+                    <View>
+                      <Text style={{ color: theme.text, fontWeight: "600" }}>
+                        {trea.name}
+                      </Text>
 
-                        <Text style={{ color: theme.text, opacity: 0.5, fontSize: 12, marginTop: 4 }}>
-                          Termina em: {formatDate(trea.endAt)}
+                      {trea.description && (
+                        <Text
+                          style={{ color: theme.text, opacity: 0.7, fontSize: 13 }}
+                          numberOfLines={1}
+                        >
+                          {trea.description}
                         </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-        
+                      )}
+
+                      <Text style={{ color: theme.text, opacity: 0.5, fontSize: 12, marginTop: 4 }}>
+                        Termina em: {formatDate(trea.endAt)}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
               <AddTreatmentButton />
             </>
           )}
         </ScrollView>
+
+
       )}
-      <SharedTreatments/>
+
+       <View style={{ marginTop: 10 }}>
+              <TouchableOpacity
+                onPress={() => router.push("/progress-visualization")}
+              >
+                <Text style={{ fontSize: 16, fontWeight: "600", color: theme.tint }}>
+                  📊 Ver Relatório
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            
+      <SharedTreatments />
 
     </Background>
   );
