@@ -203,6 +203,16 @@ export default function TreatmentDetailScreen() {
 
       <View style={{ marginTop: 10 }}>
         <TouchableOpacity
+          onPress={() => router.push("/progress-visualization")}
+        >
+          <Text style={{ fontSize: 16, fontWeight: "600", color: theme.tint }}>
+            📊 Ver Relatório
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ marginTop: 10 }}>
+        <TouchableOpacity
           onPress={() =>
             Alert.alert(
               "Confirmar reset",
@@ -238,11 +248,6 @@ export default function TreatmentDetailScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-
-
-
-
-
 
       <Modal visible={shareVisible} transparent animationType="fade">
         <View style={localStyles.modalOverlay}>
