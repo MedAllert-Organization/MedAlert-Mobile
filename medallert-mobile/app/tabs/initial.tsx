@@ -19,13 +19,9 @@ import * as Notifications from "expo-notifications";
 import Background from "@/components/Background";
 import { Medication } from "@/constants/Models";
 
-
-
 function convertToUserTimezone(dateString: string, timezone: string) {
-  console.log("Converting date:", dateString, "to timezone:", timezone);
   try {
     const date = new Date(dateString);
-
     return new Intl.DateTimeFormat("pt-BR", {
       timeZone: timezone,
       hour: "2-digit",
@@ -34,31 +30,6 @@ function convertToUserTimezone(dateString: string, timezone: string) {
   } catch {
     return null;
   }
-}
-function toUserZonedDate(dateString: string, timezone: string): Date {
-  const date = new Date(dateString);
-
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    hour12: false,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-
-  const parts = formatter.formatToParts(date);
-
-  const y = parts.find(p => p.type === "year")?.value;
-  const m = parts.find(p => p.type === "month")?.value;
-  const d = parts.find(p => p.type === "day")?.value;
-  const h = parts.find(p => p.type === "hour")?.value;
-  const min = parts.find(p => p.type === "minute")?.value;
-  const s = parts.find(p => p.type === "second")?.value;
-
-  return new Date(`${y}-${m}-${d}T${h}:${min}:${s}`);
 }
 
 export default function Initial() {
@@ -71,29 +42,46 @@ export default function Initial() {
 
   const updateNotifications = async (meds: Medication[]) => {
     try {
+      console.log("🔄 Cancelando todas notificações existentes...");
       await Notifications.cancelAllScheduledNotificationsAsync();
 
       for (const med of meds) {
         if (!med.nextTakeAt) continue;
-        const nextAlert = toUserZonedDate(med.nextTakeAt, med.timezone ?? "America/Sao_Paulo");
 
-        if (nextAlert.getTime() > Date.now()) {
-          await Notifications.scheduleNotificationAsync({
-            content: {
-              title: `Lembrete: ${med.name}`,
-              body: `Está na hora de tomar ${med.dose || "seu medicamento"}.`,
-              sound: true,
-            },
-            trigger: {
-              date: nextAlert,
-            } as Notifications.DateTriggerInput
+        const nextAlert = new Date(med.nextTakeAt);
 
-          });
-
+        if (isNaN(nextAlert.getTime())) {
+          console.log(`❌ Data inválida para ${med.name}:`, med.nextTakeAt);
+          continue;
         }
+
+        if (nextAlert.getTime() <= Date.now()) {
+          console.log(`⏩ Horário de ${med.name} já passou, ignorado.`);
+          continue;
+        }
+
+        console.log(
+          `📆 Agendando notificação para ${med.name} → ${nextAlert.toISOString()}`
+        );
+
+        const notificationId = await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `Lembrete: ${med.name}`,
+            body: `Está na hora de tomar ${med.dose || "seu medicamento"}.`,
+            sound: true,
+          },
+
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: nextAlert,
+          }
+        });
+        console.log(await Notifications.getPermissionsAsync())
+
+        console.log(`✅ Notificação agendada com sucesso!`);
       }
     } catch (error) {
-      console.error("Erro ao atualizar notificações:", error);
+      console.error("❌ Erro ao atualizar notificações:", error);
     }
   };
 
@@ -120,6 +108,7 @@ export default function Initial() {
         ? data.medications.medications
         : [];
 
+      // timezone pode vir null → fallback
       const timezone = data?.medications?.timezone ?? "America/Sao_Paulo";
 
       const medsWithTimezone = meds.map((m: any) => ({
@@ -129,6 +118,7 @@ export default function Initial() {
 
       setMedicines(medsWithTimezone);
 
+      // 🔥 Agenda notificações
       await updateNotifications(medsWithTimezone);
     } catch (err) {
       console.error("Erro ao buscar medicamentos:", err);
@@ -138,14 +128,9 @@ export default function Initial() {
     }
   };
 
-
   useFocusEffect(
     useCallback(() => {
-      let isActive = true;
-      if (isActive) fetchMedicines();
-      return () => {
-        isActive = false;
-      };
+      fetchMedicines();
     }, [token])
   );
 
@@ -186,7 +171,7 @@ export default function Initial() {
 
               await fetchMedicines();
             } catch (error) {
-              console.error("Erro ao atualizar progresso:", error);
+              console.error("Erro:", error);
               Alert.alert("Erro", "Não foi possível atualizar o progresso.");
             }
           },
@@ -211,10 +196,7 @@ export default function Initial() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.text }]}>
-              {getGreeting()}!
-            </Text>
-
+            <Text style={[styles.title, { color: theme.text }]}>{getGreeting()}!</Text>
           </View>
 
           {medicines.length === 0 ? (

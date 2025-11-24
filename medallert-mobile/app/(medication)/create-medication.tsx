@@ -180,7 +180,6 @@ export default function CreateMedication() {
               inputStyle={{ height: 160, textAlignVertical: "top" }}
             />
 
-
             <DateTimePickerModal
               isVisible={isMedicationDateVisible}
               mode="date"
@@ -205,7 +204,7 @@ export default function CreateMedication() {
           ) : (
             meds.map((item) => (
               <MedicationItem
-                key={item.id}
+                key={item.medicationId}
                 name={item.name ?? ""}
                 onPress={async () => Alert.alert(
                   "Confirmar exclusão",
