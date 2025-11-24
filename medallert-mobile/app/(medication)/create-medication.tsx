@@ -11,14 +11,10 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Text,
-  TouchableOpacity,
   View,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../../utils/remedyStyles";
 import env from "@/config/env";
 import { Medication } from "@/constants/Models";
@@ -27,8 +23,6 @@ export type MedicationsRequest = {
   success: boolean;
   medications: Medication[];
 };
-
-
 
 type CreateMedication = {
   name: string;
@@ -55,7 +49,6 @@ export default function CreateMedication() {
     setMedicationEndDate(date);
     hideDatePicker();
   };
-  const showMedicationEndPicker = () => setIsMedicationDateVisible(true);
 
   const getMedications = useCallback(async (): Promise<void> => {
     try {
@@ -222,7 +215,7 @@ export default function CreateMedication() {
                     {
                       text: "Apagar",
                       style: "destructive",
-                      onPress: () => deleteMedication(item.id),
+                      onPress: () => deleteMedication(item.medicationId),
                     },
                   ]
                 )

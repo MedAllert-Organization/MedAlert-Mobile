@@ -72,7 +72,7 @@ export default function MedicineDetail() {
 
   const handleGoToNotes = () => {
     router.push({
-      pathname: "/medication-notes-detail",
+      pathname: "/detail-medication-notes",
       params: {
         medicationId: medication?.medicationId,
         medicationName: medication?.name,
