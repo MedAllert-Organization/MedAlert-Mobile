@@ -5,11 +5,10 @@ export default function MedicationLayout() {
     <Stack>
       <Stack.Screen name="create-medication" options={{ headerShown: false }} />
       <Stack.Screen name="create-treatment" options={{ headerShown: false }} />
-      <Stack.Screen name="medication-detail" options={{ headerShown: false }} />
-      <Stack.Screen name="medication-treatment-detail" options={{ headerShown: false }} />
-      <Stack.Screen name="treatment-detail" options={{ headerShown: false }} />
-      <Stack.Screen name="medication-notes-detail" options={{ headerShown: false }} />
-      <Stack.Screen name="medication-notes-list" options={{ headerShown: false }} />
+      <Stack.Screen name="detail-medication" options={{ headerShown: false }} />
+      <Stack.Screen name="detail-treatment" options={{ headerShown: false }} />
+      <Stack.Screen name="detail-medication-notes" options={{ headerShown: false }} />
+      <Stack.Screen name="list-medication-notes" options={{ headerShown: false }} />
 
       <Stack.Screen
         name="share-medication"

@@ -15,7 +15,7 @@ import Colors from "@/constants/Colors";
 import { useAuth } from "@/providers/auth-provider";
 import styles from "@/utils/styles";
 import env from "@/config/env";
-import type { Medication } from "../(medication)/create-medication";
+import { Medication } from "@/constants/Models";
 
 export default function MedicationView() {
   const { token } = useAuth();

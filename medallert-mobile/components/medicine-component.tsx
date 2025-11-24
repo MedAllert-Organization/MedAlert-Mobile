@@ -1,5 +1,5 @@
-import { Medication } from "@/app/(medication)/create-medication";
 import Colors from "@/constants/Colors";
+import { Medication } from "@/constants/Models";
 import styles from "@/utils/styles";
 import { router } from "expo-router";
 import {
@@ -20,7 +20,7 @@ export default function MedicineComponent({ medicines }: Props) {
 
   function handlePress(med: Medication) {
     router.push({
-      pathname: "/medication-detail",
+      pathname: "/detail-medication",
       params: { med: JSON.stringify(med) },
     });
   }

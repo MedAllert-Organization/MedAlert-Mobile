@@ -17,24 +17,12 @@ import LinkText from "@/components/LinkText";
 import { router } from "expo-router";
 import { BackButton } from "@/components/BackButton";
 import env from "@/config/env";
-import { Medication } from "./create-medication";
 import { scheduleMedicationReminder } from "@/utils/notifications";
+import { Medication, Treatment } from "@/constants/Models";
 
 export type MedicationsRequest = {
   success: boolean;
   medications: Medication[];
-};
-
-export type Treatment = {
-  treatmentId: string;
-  userId: string;
-  name: string;
-  description: string | null;
-  startAt: string;
-  endAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-  medications?: Medication[];
 };
 
 export type TreatmentRequest = {

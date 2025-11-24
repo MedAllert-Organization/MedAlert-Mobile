@@ -14,8 +14,9 @@ import Colors from "@/constants/Colors";
 import { useAuth } from "@/providers/auth-provider";
 import styles from "@/utils/styles";
 import env from "@/config/env";
-import { Treatment } from "../(medication)/create-treatment";
 import { SharedTreatments } from "@/components/SharedTreatments";
+import { Treatment } from "@/constants/Models";
+
 
 export default function TreatmentView() {
   const { logout, token } = useAuth();
@@ -35,12 +36,12 @@ export default function TreatmentView() {
 
   function handlePress(treatmentId: string) {
     router.push({
-      pathname: "/treatment-detail",
+      pathname: "/detail-treatment",
       params: { id: treatmentId },
     });
   }
 
-  function formatDate(dateString: string | null): string {
+  function formatDate(dateString?: string | null): string {
     if (!dateString) return "Sem data definida";
     const date = new Date(dateString);
     return date.toLocaleDateString("pt-BR", {

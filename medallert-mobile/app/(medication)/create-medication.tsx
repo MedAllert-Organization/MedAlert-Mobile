@@ -21,28 +21,14 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../../utils/remedyStyles";
 import env from "@/config/env";
+import { Medication } from "@/constants/Models";
 
 export type MedicationsRequest = {
   success: boolean;
   medications: Medication[];
 };
 
-export type Medication = {
-  medicationId: string;
-  treatmentId: string | null;
-  userId: string | null;
-  name: string | null
-  dose: string | null;
-  description: string | null;
-  visualTypeId: string | null;
-  soundTypeId: string | null;
-  alertPeriodInMinutes: number | null;
-  takenQuantity: number | null;
-  totalQuantity: number | null;
-  createdAt: string | null;
-  updatedAt: string | null;
-  lastTaken: Date | null;
-};
+
 
 type CreateMedication = {
   name: string;
@@ -226,7 +212,7 @@ export default function CreateMedication() {
           ) : (
             meds.map((item) => (
               <MedicationItem
-                key={item.medicationId}
+                key={item.id}
                 name={item.name ?? ""}
                 onPress={async () => Alert.alert(
                   "Confirmar exclusão",
@@ -236,7 +222,7 @@ export default function CreateMedication() {
                     {
                       text: "Apagar",
                       style: "destructive",
-                      onPress: () => deleteMedication(item.medicationId),
+                      onPress: () => deleteMedication(item.id),
                     },
                   ]
                 )

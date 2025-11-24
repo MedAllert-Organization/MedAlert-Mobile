@@ -15,29 +15,15 @@ import { getToken } from "@/providers/auth-provider";
 import Background from "@/components/Background";
 import { BackButton } from "@/components/BackButton";
 import ButtonPrimary from "@/components/ButtonPrimary";
-import { Medication } from "./create-medication";
+import { Medication, Treatment } from "@/constants/Models";
 
-type MedicationGeneral = {
-  medicationId: string;
-  name: string;
-  description: string;
-  visualTypeId: string | null;
-  soundTypeId: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
 
-type Treatment = {
-  id: string;
-  name: string;
-  description?: string | null;
-};
 
 export default function MedicineDetail() {
   const { med } = useLocalSearchParams<{ med: string }>();
   const medication: Medication | null = med ? JSON.parse(med) : null;
 
-  const [generalInfo, setGeneralInfo] = useState<MedicationGeneral | null>(null);
+  const [generalInfo, setGeneralInfo] = useState<Medication | null>(null);
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -137,7 +123,7 @@ export default function MedicineDetail() {
           ) : (
             treatments.map((treatment) => (
               <View
-                key={treatment.id}
+                key={treatment.treatmentId}
                 style={[
                   styles.treatmentCard,
                   { backgroundColor: theme.background },

@@ -6,13 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getToken } from "@/providers/auth-provider";
 import env from "@/config/env";
 import { router } from "expo-router";
-
-type Medication = {
-    medicationId: string;
-    name: string;
-    dose: string;
-    description: string;
-};
+import { Medication } from "@/constants/Models";
 
 type AnnotationsCount = {
     [medicationId: string]: number;

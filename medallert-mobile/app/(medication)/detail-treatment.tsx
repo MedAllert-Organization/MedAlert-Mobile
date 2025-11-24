@@ -18,8 +18,8 @@ import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
 import { BackButton } from "@/components/BackButton";
 import Background from "@/components/Background";
-import { Treatment } from "./create-treatment";
-import MedicineTreatmentDetail from "./medication-treatment-detail";
+import MedicineTreatmentDetail from "./detail-medication-treatment";
+import { Treatment } from "@/constants/Models";
 
 export default function TreatmentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -180,12 +180,16 @@ export default function TreatmentDetailScreen() {
         </TouchableOpacity>
       </View>
 
-      <Text style={{ color: theme.text }}>
-        Início: {formatDate(treatment.startAt)}
-      </Text>
-      <Text style={{ color: theme.text, marginBottom: 10 }}>
-        Término: {formatDate(treatment.endAt)}
-      </Text>
+      {treatment.startAt && treatment.endAt && (
+        <>
+          <Text style={{ color: theme.text }}>
+            Início: {formatDate(treatment.startAt)}
+          </Text>
+          <Text style={{ color: theme.text, marginBottom: 10 }}>
+            Término: {formatDate(treatment.endAt)}
+          </Text>
+        </>
+      )}
 
       <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
         {(!treatment.medications || treatment.medications.length === 0) ? (
@@ -201,7 +205,7 @@ export default function TreatmentDetailScreen() {
         )}
       </ScrollView>
 
-     
+
 
       <View style={{ marginTop: 10 }}>
         <TouchableOpacity

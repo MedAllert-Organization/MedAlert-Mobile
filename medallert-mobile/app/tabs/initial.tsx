@@ -17,35 +17,17 @@ import env from "@/config/env";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import Background from "@/components/Background";
+import { Medication } from "@/constants/Models";
 
-export type Medication = {
-  medicationId: string;
-  treatmentId: string | null;
-  userId?: string;
-  name: string;
-  dose: string;
-  description?: string;
-  visualTypeId?: string | null;
-  soundTypeId?: string | null;
-  alertPeriodInMinutes?: number;
-  endTreatmentAt?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
-  takenQuantity: number | null;
-  totalQuantity: number | null;
-  lastTaken?: string | null;
-  nextTakeAt?: string | null;
-  timezone?: string;
-};
 
-function convertToUserTimezone(dateString: string, timezone?: string) {
+
+function convertToUserTimezone(dateString: string, timezone: string) {
+  console.log("Converting date:", dateString, "to timezone:", timezone);
   try {
     const date = new Date(dateString);
 
-    const tz = timezone || "UTC";
-
     return new Intl.DateTimeFormat("pt-BR", {
-      timeZone: tz,
+      timeZone: timezone,
       hour: "2-digit",
       minute: "2-digit",
     }).format(date);
@@ -53,7 +35,31 @@ function convertToUserTimezone(dateString: string, timezone?: string) {
     return null;
   }
 }
+function toUserZonedDate(dateString: string, timezone: string): Date {
+  const date = new Date(dateString);
 
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  const parts = formatter.formatToParts(date);
+
+  const y = parts.find(p => p.type === "year")?.value;
+  const m = parts.find(p => p.type === "month")?.value;
+  const d = parts.find(p => p.type === "day")?.value;
+  const h = parts.find(p => p.type === "hour")?.value;
+  const min = parts.find(p => p.type === "minute")?.value;
+  const s = parts.find(p => p.type === "second")?.value;
+
+  return new Date(`${y}-${m}-${d}T${h}:${min}:${s}`);
+}
 
 export default function Initial() {
   const { logout, token } = useAuth();
@@ -69,7 +75,8 @@ export default function Initial() {
 
       for (const med of meds) {
         if (!med.nextTakeAt) continue;
-        const nextAlert = new Date(med.nextTakeAt);
+        const nextAlert = toUserZonedDate(med.nextTakeAt, med.timezone ?? "America/Sao_Paulo");
+
         if (nextAlert.getTime() > Date.now()) {
           await Notifications.scheduleNotificationAsync({
             content: {
@@ -78,11 +85,11 @@ export default function Initial() {
               sound: true,
             },
             trigger: {
-              type: "timeInterval",
-              seconds: Math.max(1, (nextAlert.getTime() - Date.now()) / 1000),
-              repeats: false,
-            } as Notifications.TimeIntervalTriggerInput,
+              date: nextAlert,
+            } as Notifications.DateTriggerInput
+
           });
+
         }
       }
     } catch (error) {
@@ -194,7 +201,6 @@ export default function Initial() {
     if (hour >= 12 && hour < 18) return "Boa tarde";
     return "Boa noite";
   }
-
 
   return (
     <Background>

@@ -7,14 +7,9 @@ import { useCallback, useEffect, useState } from "react";
 import { getToken } from "@/providers/auth-provider";
 import env from "@/config/env";
 import { useLocalSearchParams } from "expo-router";
+import { Annotation } from "@/constants/Models";
 
-type Annotation = {
-    annotationId: string;
-    medicationId: string;
-    content: string;
-    createdAt: string;
-    updatedAt: string;
-};
+
 
 export default function MedicationNotesDetail() {
     const colorScheme = useColorScheme();

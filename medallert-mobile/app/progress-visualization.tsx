@@ -219,7 +219,7 @@ export default function ProgressVisualization() {
                 <TouchableOpacity
                   key={treatment.treatmentId}
                   style={styles.treatmentCard}
-                  onPress={() => router.push(`/treatment-detail?id=${treatment.treatmentId}`)}
+                  onPress={() => router.push(`/detail-treatment?id=${treatment.treatmentId}`)}
                   activeOpacity={0.7}
                 >
                   <View style={styles.treatmentHeader}>
