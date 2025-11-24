@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useColorScheme } from "react-native";
@@ -17,8 +18,6 @@ import { BackButton } from "@/components/BackButton";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import { Medication, Treatment } from "@/constants/Models";
 
-
-
 export default function MedicineDetail() {
   const { med } = useLocalSearchParams<{ med: string }>();
   const medication: Medication | null = med ? JSON.parse(med) : null;
@@ -29,6 +28,28 @@ export default function MedicineDetail() {
 
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+
+    async function deleteMedication() {
+    try {
+      const token = await getToken();
+
+      const res = await fetch(`${env.BASE_URL}/medication/medication/${medication?.medicationId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro ao apagar medicação");
+
+      Alert.alert("Sucesso", "Medicação apagada.");
+      router.replace("/tabs/medication");
+    } catch (e) {
+      Alert.alert("Erro", "Houve um erro ao apagar a medicação!");
+      console.log(e);
+    }
+  }
 
   const fetchGeneralInfo = useCallback(async () => {
     if (!medication?.medicationId) return;
@@ -149,6 +170,25 @@ export default function MedicineDetail() {
           />
         </View>
       </ScrollView>
+
+      <View style={{ marginTop: 20 }}>
+              <TouchableOpacity
+                onPress={() =>
+                  Alert.alert(
+                    "Confirmar exclusão",
+                    "Tem certeza que deseja apagar essa medicação?",
+                    [
+                      { text: "Cancelar", style: "cancel" },
+                      { text: "Apagar", style: "destructive", onPress: deleteMedication },
+                    ]
+                  )
+                }
+              >
+                <Text style={{ fontSize: 16, fontWeight: "600", color: "red" }}>
+                  Deletar medicação
+                </Text>
+              </TouchableOpacity>
+            </View>
     </Background>
   );
 }
