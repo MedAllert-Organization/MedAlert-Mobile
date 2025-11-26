@@ -9,6 +9,7 @@ export default function MedicationLayout() {
       <Stack.Screen name="detail-treatment" options={{ headerShown: false }} />
       <Stack.Screen name="detail-medication-notes" options={{ headerShown: false }} />
       <Stack.Screen name="list-medication-notes" options={{ headerShown: false }} />
+      <Stack.Screen name="progress-visualization" options={{ headerShown: false }} />
 
       <Stack.Screen
         name="share-medication"

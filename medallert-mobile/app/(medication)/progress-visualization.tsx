@@ -1,5 +1,4 @@
 import { Text, View, useColorScheme, StyleSheet, ScrollView, Alert, TouchableOpacity, ActivityIndicator } from "react-native";
-import Colors from "../constants/Colors";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Background from "@/components/Background";
 import { File } from 'expo-file-system';
@@ -9,6 +8,7 @@ import { getToken } from "@/providers/auth-provider";
 import env from "@/config/env";
 import { router } from "expo-router";
 import { BackButton } from "@/components/BackButton";
+import Colors from "@/constants/Colors";
 
 type TreatmentMedication = {
   medicationId: string;

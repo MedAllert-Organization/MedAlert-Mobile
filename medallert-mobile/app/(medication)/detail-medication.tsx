@@ -46,7 +46,7 @@ export default function MedicineDetail() {
       Alert.alert("Sucesso", "Medicação apagada.");
       router.replace("/tabs/medication");
     } catch (e) {
-      Alert.alert("Erro", "Houve um erro ao apagar a medicação!");
+      Alert.alert("Erro", "Sua medicação está vinculada a um tratamento. Remova o tratamento primeiro.");
       console.log(e);
     }
   }

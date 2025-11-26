@@ -12,7 +12,6 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import env from "@/config/env";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
@@ -22,11 +21,26 @@ import { Medication } from "@/constants/Models";
 function convertToUserTimezone(dateString: string, timezone: string) {
   try {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat("pt-BR", {
+    const now = new Date();
+
+    const formatted = new Intl.DateTimeFormat("pt-BR", {
       timeZone: timezone,
       hour: "2-digit",
       minute: "2-digit",
     }).format(date);
+
+    const diff = Math.abs(date.getTime() - now.getTime());
+
+    if (diff <= 15000) {
+      return `Agora (${formatted})`;
+    }
+
+    if (date.getTime() + 60000 < now.getTime()) {
+      return `Já passou do horário (${formatted})`;
+    }
+
+    return formatted;
+
   } catch {
     return null;
   }
@@ -108,7 +122,6 @@ export default function Initial() {
         ? data.medications.medications
         : [];
 
-      // timezone pode vir null → fallback
       const timezone = data?.medications?.timezone ?? "America/Sao_Paulo";
 
       const medsWithTimezone = meds.map((m: any) => ({
@@ -118,7 +131,6 @@ export default function Initial() {
 
       setMedicines(medsWithTimezone);
 
-      // 🔥 Agenda notificações
       await updateNotifications(medsWithTimezone);
     } catch (err) {
       console.error("Erro ao buscar medicamentos:", err);

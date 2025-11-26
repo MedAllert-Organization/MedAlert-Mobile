@@ -162,7 +162,7 @@ export default function TreatmentView() {
 
        <View style={{ marginTop: 10 }}>
               <TouchableOpacity
-                onPress={() => router.push("/progress-visualization")}
+                onPress={() => router.push("/(medication)/progress-visualization")}
               >
                 <Text style={{ fontSize: 16, fontWeight: "600", color: theme.tint }}>
                   📊 Ver Relatório
