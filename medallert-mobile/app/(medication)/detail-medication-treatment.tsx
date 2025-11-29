@@ -10,7 +10,13 @@ import {
 import Colors from "@/constants/Colors";
 import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
-import { Medication } from "./create-medication";
+import {
+  Medication,
+  VisualSizeEnum,
+  VisualType,
+  VisualTypeEnum,
+} from "@/constants/Models";
+import MedicationIcon from "@/components/MedicationIcon";
 
 interface Props {
   medication: Medication;
@@ -30,7 +36,7 @@ export default function MedicineTreatmentDetail({ medication }: Props) {
       const token = await getToken();
       const response = await fetch(
         `${env.BASE_URL}/medication/medication/${medication.medicationId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       const text = await response.text();
@@ -46,8 +52,10 @@ export default function MedicineTreatmentDetail({ medication }: Props) {
 
       const found =
         data?.medications?.find?.(
-          (m: Medication) => m.medicationId === medication.medicationId
-        ) ?? data.medication ?? null;
+          (m: Medication) => m.medicationId === medication.medicationId,
+        ) ??
+        data.medication ??
+        null;
 
       setGeneralInfo(found);
     } catch (err) {
@@ -70,7 +78,25 @@ export default function MedicineTreatmentDetail({ medication }: Props) {
 
   return (
     <View style={[styles.card, { backgroundColor: theme.background }]}>
-      <Text style={[styles.title, { color: theme.text }]}>{medication.name}</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginBottom: 4,
+        }}
+      >
+        <Text style={[styles.title, { color: theme.text }]}>
+          {medication.name}
+        </Text>
+        {medication?.visualType && (
+          <MedicationIcon
+            color={medication?.visualType.color1}
+            type={medication?.visualType.visualType}
+            size={medication?.visualType.size}
+            pattern={medication?.visualType.pattern}
+          />
+        )}
+      </View>
 
       {medication.dose && (
         <Text style={[styles.subtitle, { color: theme.text }]}>
