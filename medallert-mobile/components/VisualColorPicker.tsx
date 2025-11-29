@@ -164,12 +164,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     maxHeight: "80%",
+    paddingBottom: 24,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
