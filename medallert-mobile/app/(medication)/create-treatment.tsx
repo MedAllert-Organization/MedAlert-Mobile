@@ -10,7 +10,7 @@ import VisualColorPicker, {
 import VisualSizePicker from "@/components/VisualSizePicker";
 import VisualTypePicker from "@/components/VisualTypePicker";
 import env from "@/config/env";
-import type {
+import {
   Medication,
   Treatment,
   VisualPatternEnum,
@@ -50,15 +50,21 @@ type CreateTreatment = {
   }[];
 };
 
+type MedicationUIData = {
+  dose: string;
+  totalQuantity: string;
+  alertPeriodInMinutes: string;
+  visualType: VisualTypeEnum | null;
+  visualSize: VisualSizeEnum | null;
+  visualColor: VisualColorEnum | null;
+};
+
 export default function TreatmentsScreen() {
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [meds, setMeds] = useState<Medication[]>([]);
   const [selectedMedications, setSelectedMedications] = useState<string[]>([]);
   const [medicationsData, setMedicationsData] = useState<
-    Record<
-      string,
-      { dose: string; totalQuantity: string; alertPeriodInMinutes: string }
-    >
+    Record<string, Partial<MedicationUIData>>
   >({});
 
   const [newTreatmentName, setNewTreatmentName] = useState("");
@@ -67,14 +73,6 @@ export default function TreatmentsScreen() {
   const [treatmentEndDate, setTreatmentEndDate] = useState<Date | null>(null);
   const [isStartPickerVisible, setStartPickerVisible] = useState(false);
   const [isEndPickerVisible, setEndPickerVisible] = useState(false);
-
-  const [selectedType, setSelectedType] = useState<VisualTypeEnum | null>(null);
-  const [selectedSize, setSelectedSize] = useState<VisualSizeEnum | null>(null);
-  const [selectedPattern, setSelectedPattern] =
-    useState<VisualPatternEnum | null>(null);
-  const [selectedColor, setSelectedColor] = useState<VisualColorEnum | null>(
-    null,
-  );
 
   const getTreatments = useCallback(async (): Promise<void> => {
     try {
@@ -178,10 +176,10 @@ export default function TreatmentsScreen() {
     });
   }
 
-  function updateMedicationData(
+  function updateMedicationData<K extends keyof MedicationUIData>(
     id: string,
-    field: "dose" | "totalQuantity" | "alertPeriodInMinutes",
-    value: string,
+    field: K,
+    value: MedicationUIData[K],
   ) {
     setMedicationsData((prev) => ({
       ...prev,
@@ -220,9 +218,9 @@ export default function TreatmentsScreen() {
         takenQuantity: 0,
         totalQuantity: parseInt(medData?.totalQuantity || "", 10),
         visualType: {
-          visualType: selectedType ?? VisualTypeEnum.PILL,
-          size: selectedSize ?? VisualSizeEnum.MEDIUM,
-          color1: selectedColor ?? "#B4B8C5",
+          visualType: medData?.visualType ?? VisualTypeEnum.PILL,
+          size: medData?.visualSize ?? VisualSizeEnum.MEDIUM,
+          color1: medData?.visualColor ?? "#B4B8C5",
           color2: "",
           pattern: VisualPatternEnum.SOLID,
         },
@@ -250,10 +248,6 @@ export default function TreatmentsScreen() {
     setTreatmentEndDate(null);
     setSelectedMedications([]);
     setMedicationsData({});
-    setSelectedColor(null);
-    setSelectedPattern(null);
-    setSelectedType(null);
-    setSelectedSize(null);
   }
 
   return (
@@ -345,18 +339,24 @@ export default function TreatmentsScreen() {
 
               <View style={{ gap: 8, marginBottom: 4 }}>
                 <VisualTypePicker
-                  onSelect={setSelectedType}
-                  value={selectedType}
+                  onSelect={(value) =>
+                    updateMedicationData(id, "visualType", value)
+                  }
+                  value={medData?.visualType ?? null}
                 />
 
                 <VisualSizePicker
-                  onSelect={setSelectedSize}
-                  value={selectedSize}
+                  onSelect={(value) =>
+                    updateMedicationData(id, "visualSize", value)
+                  }
+                  value={medData?.visualSize ?? null}
                 />
 
                 <VisualColorPicker
-                  onSelect={setSelectedColor}
-                  value={selectedColor}
+                  onSelect={(value) =>
+                    updateMedicationData(id, "visualColor", value)
+                  }
+                  value={medData?.visualColor ?? null}
                 />
               </View>
             </View>
