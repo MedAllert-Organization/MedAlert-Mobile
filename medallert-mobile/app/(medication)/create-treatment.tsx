@@ -1,24 +1,29 @@
+import { BackButton } from "@/components/BackButton";
 import Background from "@/components/Background";
 import ButtonPrimary from "@/components/ButtonPrimary";
+import LinkText from "@/components/LinkText";
 import Subtitle from "@/components/Subtitle";
 import TextField from "@/components/TextField";
+import VisualColorPicker, {
+  VisualColorEnum,
+} from "@/components/VisualColorPicker";
+import VisualSizePicker from "@/components/VisualSizePicker";
+import VisualTypePicker from "@/components/VisualTypePicker";
+import env from "@/config/env";
+import type {
+  Medication,
+  Treatment,
+  VisualPatternEnum,
+  VisualSizeEnum,
+  VisualTypeEnum,
+} from "@/constants/Models";
+import { getToken } from "@/providers/auth-provider";
+import { scheduleMedicationReminder } from "@/utils/notifications";
+import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import {
-  Alert,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
-} from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { styles } from "../../utils/remedyStyles";
-import { getToken } from "@/providers/auth-provider";
-import LinkText from "@/components/LinkText";
-import { router } from "expo-router";
-import { BackButton } from "@/components/BackButton";
-import env from "@/config/env";
-import { scheduleMedicationReminder } from "@/utils/notifications";
-import { Medication, Treatment } from "@/constants/Models";
 
 export type MedicationsRequest = {
   success: boolean;
@@ -49,10 +54,12 @@ export default function TreatmentsScreen() {
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [meds, setMeds] = useState<Medication[]>([]);
   const [selectedMedications, setSelectedMedications] = useState<string[]>([]);
-  const [medicationsData, setMedicationsData] = useState<Record<
-    string,
-    { dose: string; totalQuantity: string; alertPeriodInMinutes: string }
-  >>({});
+  const [medicationsData, setMedicationsData] = useState<
+    Record<
+      string,
+      { dose: string; totalQuantity: string; alertPeriodInMinutes: string }
+    >
+  >({});
 
   const [newTreatmentName, setNewTreatmentName] = useState("");
   const [newTreatmentDesc, setNewTreatmentDesc] = useState("");
@@ -60,6 +67,14 @@ export default function TreatmentsScreen() {
   const [treatmentEndDate, setTreatmentEndDate] = useState<Date | null>(null);
   const [isStartPickerVisible, setStartPickerVisible] = useState(false);
   const [isEndPickerVisible, setEndPickerVisible] = useState(false);
+
+  const [selectedType, setSelectedType] = useState<VisualTypeEnum | null>(null);
+  const [selectedSize, setSelectedSize] = useState<VisualSizeEnum | null>(null);
+  const [selectedPattern, setSelectedPattern] =
+    useState<VisualPatternEnum | null>(null);
+  const [selectedColor, setSelectedColor] = useState<VisualColorEnum | null>(
+    null,
+  );
 
   const getTreatments = useCallback(async (): Promise<void> => {
     try {
@@ -156,14 +171,17 @@ export default function TreatmentsScreen() {
 
     setMedicationsData((prev) => {
       if (prev[id]) return prev;
-      return { ...prev, [id]: { dose: "", totalQuantity: "", alertPeriodInMinutes: "" } };
+      return {
+        ...prev,
+        [id]: { dose: "", totalQuantity: "", alertPeriodInMinutes: "" },
+      };
     });
   }
 
   function updateMedicationData(
     id: string,
     field: "dose" | "totalQuantity" | "alertPeriodInMinutes",
-    value: string
+    value: string,
   ) {
     setMedicationsData((prev) => ({
       ...prev,
@@ -175,8 +193,15 @@ export default function TreatmentsScreen() {
   }
 
   async function handleAddTreatment() {
-    if (!newTreatmentName || !newTreatmentDesc || selectedMedications.length === 0) {
-      Alert.alert("Atenção", "Preencha todos os campos e selecione ao menos um medicamento!");
+    if (
+      !newTreatmentName ||
+      !newTreatmentDesc ||
+      selectedMedications.length === 0
+    ) {
+      Alert.alert(
+        "Atenção",
+        "Preencha todos os campos e selecione ao menos um medicamento!",
+      );
       return;
     }
 
@@ -189,10 +214,18 @@ export default function TreatmentsScreen() {
         dose: medData?.dose || "",
         alertPeriodInMinutes:
           parseInt(medData?.alertPeriodInMinutes || "", 10) ||
-          (medFromList?.alertPeriodInMinutes || 0),
+          medFromList?.alertPeriodInMinutes ||
+          0,
         lastTaken: null,
         takenQuantity: 0,
         totalQuantity: parseInt(medData?.totalQuantity || "", 10),
+        visualType: {
+          visualType: selectedType ?? VisualTypeEnum.PILL,
+          size: selectedSize ?? VisualSizeEnum.MEDIUM,
+          color1: selectedColor ?? "#B4B8C5",
+          color2: "",
+          pattern: VisualPatternEnum.SOLID,
+        },
       };
     });
 
@@ -217,6 +250,10 @@ export default function TreatmentsScreen() {
     setTreatmentEndDate(null);
     setSelectedMedications([]);
     setMedicationsData({});
+    setSelectedColor(null);
+    setSelectedPattern(null);
+    setSelectedType(null);
+    setSelectedSize(null);
   }
 
   return (
@@ -292,15 +329,36 @@ export default function TreatmentsScreen() {
                 placeholder="Quantidade total"
                 value={medData?.totalQuantity || ""}
                 keyboardType="numeric"
-                onChangeText={(text) => updateMedicationData(id, "totalQuantity", text)}
+                onChangeText={(text) =>
+                  updateMedicationData(id, "totalQuantity", text)
+                }
               />
 
               <TextField
                 placeholder="Alertar a cada X minutos"
                 value={medData?.alertPeriodInMinutes || ""}
                 keyboardType="numeric"
-                onChangeText={(text) => updateMedicationData(id, "alertPeriodInMinutes", text)}
+                onChangeText={(text) =>
+                  updateMedicationData(id, "alertPeriodInMinutes", text)
+                }
               />
+
+              <View style={{ gap: 8, marginBottom: 4 }}>
+                <VisualTypePicker
+                  onSelect={setSelectedType}
+                  value={selectedType}
+                />
+
+                <VisualSizePicker
+                  onSelect={setSelectedSize}
+                  value={selectedSize}
+                />
+
+                <VisualColorPicker
+                  onSelect={setSelectedColor}
+                  value={selectedColor}
+                />
+              </View>
             </View>
           );
         })}
@@ -341,7 +399,9 @@ export default function TreatmentsScreen() {
           }}
         >
           <Text style={{ color: "#1a73e8" }}>
-            {treatmentEndDate ? treatmentEndDate.toLocaleDateString() : "Escolher data"}
+            {treatmentEndDate
+              ? treatmentEndDate.toLocaleDateString()
+              : "Escolher data"}
           </Text>
         </TouchableOpacity>
 
@@ -355,10 +415,7 @@ export default function TreatmentsScreen() {
           onCancel={() => setEndPickerVisible(false)}
         />
 
-        <ButtonPrimary
-          onPress={handleAddTreatment}
-          title="Criar tratamento"
-        />
+        <ButtonPrimary onPress={handleAddTreatment} title="Criar tratamento" />
 
         <View style={{ marginTop: 32 }}>
           <Subtitle>Lista de tratamentos</Subtitle>
@@ -386,14 +443,18 @@ export default function TreatmentsScreen() {
                 }}
               >
                 <View>
-                  <Text style={{ fontSize: 16, fontWeight: "600", color: "#111" }}>
+                  <Text
+                    style={{ fontSize: 16, fontWeight: "600", color: "#111" }}
+                  >
                     {item.name}
                   </Text>
                   <Text style={{ opacity: 0.6, fontSize: 13 }}>
                     {item.description}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => deleteTreatment(item.treatmentId)}>
+                <TouchableOpacity
+                  onPress={() => deleteTreatment(item.treatmentId)}
+                >
                   <Text style={{ fontSize: 18 }}>🗑️</Text>
                 </TouchableOpacity>
               </View>

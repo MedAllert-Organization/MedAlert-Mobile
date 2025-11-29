@@ -24,6 +24,7 @@ export type TreatmentMedication = {
   dose: string;
   takenQuantity: number;
   totalQuantity: number;
+  visualType: VisualType | null;
 };
 
 export type Treatment = {
@@ -35,13 +36,50 @@ export type Treatment = {
   endAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
-  medications?: Medication[] | null;
+  medications?: TreatmentMedication[] | null;
 };
 
 export type Annotation = {
-    annotationId: string;
-    medicationId: string;
-    content: string;
-    createdAt: string;
-    updatedAt: string;
+  annotationId: string;
+  medicationId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
 };
+
+export enum VisualTypeEnum {
+  CAPSULE = "CAPSULE",
+  PILL = "PILL",
+  TABLET = "TABLET",
+  DROP = "DROP",
+  LIQUID = "LIQUID",
+  INHALER = "INHALER",
+  INJECTION = "INJECTION",
+  OINTMENT = "OINTMENT",
+  PATCH = "PATCH",
+}
+
+export enum VisualSizeEnum {
+  SMALL = "SMALL",
+  MEDIUM = "MEDIUM",
+  LARGE = "LARGE",
+}
+
+export enum VisualPatternEnum {
+  SOLID = "SOLID",
+  STRIPED = "STRIPED",
+  HALF = "HALF",
+  RING = "RING",
+  DOTS = "DOTS",
+  BAND = "BAND",
+  GRADIENT = "GRADIENT",
+}
+
+export interface VisualType {
+  visualId: string;
+  visualType: VisualTypeEnum;
+  size: VisualSizeEnum;
+  color1: string;
+  color2: string | null;
+  pattern: VisualPatternEnum;
+}
