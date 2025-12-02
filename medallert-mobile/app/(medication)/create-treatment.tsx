@@ -47,6 +47,13 @@ type CreateTreatment = {
     lastTaken: null;
     takenQuantity: number;
     totalQuantity: number;
+    visualType: {
+      visualType: VisualTypeEnum,
+      size: VisualSizeEnum,
+      color1: string,
+      color2: string,
+      pattern: VisualPatternEnum,
+    }
   }[];
 };
 
