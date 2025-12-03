@@ -205,8 +205,6 @@ export default function TreatmentDetailScreen() {
         )}
       </ScrollView>
 
-
-
       <View style={{ marginTop: 10 }}>
         <TouchableOpacity
           onPress={() =>

@@ -17,6 +17,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import Background from "@/components/Background";
 import { Medication } from "@/constants/Models";
+import MedicationIcon from "@/components/MedicationIcon";
 
 function convertToUserTimezone(dateString: string, timezone: string) {
   try {
@@ -245,7 +246,11 @@ export default function Initial() {
                           },
                         ]}
                       >
-                        <View>
+                       
+                   
+                    
+                        <View >
+
                           <Text style={{ color: theme.text, fontWeight: "600" }}>
                             {med.name}
                           </Text>
@@ -273,6 +278,17 @@ export default function Initial() {
                             </Text>
                           )}
                         </View>
+
+                              {
+                          med.visualType && (
+                            <MedicationIcon
+                              color={med.visualType.color1}
+                              type={med.visualType.visualType}
+                              size={med.visualType.size}
+                              pattern={med.visualType.pattern}
+                            />
+                          )
+                        }
                       </View>
                     </TouchableOpacity>
                   );
@@ -306,6 +322,7 @@ const localStyles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
+    gap: 12,
     alignItems: "center",
     paddingVertical: 8,
   },

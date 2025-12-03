@@ -6,6 +6,7 @@ export type Medication = {
   dose?: string | null;
   description?: string;
   visualTypeId?: string;
+  visualType: VisualType | null;
   soundTypeId?: string;
   alertPeriodInMinutes?: number | null;
   endTreatmentAt?: string | null;

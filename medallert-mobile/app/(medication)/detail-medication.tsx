@@ -29,7 +29,7 @@ export default function MedicineDetail() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-    async function deleteMedication() {
+  async function deleteMedication() {
     try {
       const token = await getToken();
 
@@ -172,23 +172,23 @@ export default function MedicineDetail() {
       </ScrollView>
 
       <View style={{ marginTop: 20 }}>
-              <TouchableOpacity
-                onPress={() =>
-                  Alert.alert(
-                    "Confirmar exclusão",
-                    "Tem certeza que deseja apagar essa medicação?",
-                    [
-                      { text: "Cancelar", style: "cancel" },
-                      { text: "Apagar", style: "destructive", onPress: deleteMedication },
-                    ]
-                  )
-                }
-              >
-                <Text style={{ fontSize: 16, fontWeight: "600", color: "red" }}>
-                  Deletar medicação
-                </Text>
-              </TouchableOpacity>
-            </View>
+        <TouchableOpacity
+          onPress={() =>
+            Alert.alert(
+              "Confirmar exclusão",
+              "Tem certeza que deseja apagar essa medicação?",
+              [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Apagar", style: "destructive", onPress: deleteMedication },
+              ]
+            )
+          }
+        >
+          <Text style={{ fontSize: 16, fontWeight: "600", color: "red" }}>
+            Deletar medicação
+          </Text>
+        </TouchableOpacity>
+      </View>
     </Background>
   );
 }
