@@ -23,17 +23,17 @@ const VISUAL_COLOR_TRANSLATIONS: Record<
   VisualColorEnum,
   { pt: string; textColor: string }
 > = {
-  [VisualColorEnum.DODGER_BLUE]: { pt: "Azul Dodger", textColor: "#FFFFFF" },
-  [VisualColorEnum.DARK_ORANGE]: { pt: "Laranja Escuro", textColor: "#000000" },
-  [VisualColorEnum.LIME_GREEN]: { pt: "Verde Limão", textColor: "#000000" },
-  [VisualColorEnum.APPLE_RED]: { pt: "Vermelho Apple", textColor: "#FFFFFF" },
-  [VisualColorEnum.GOLD]: { pt: "Ouro", textColor: "#000000" },
-  [VisualColorEnum.BLUE_VIOLET]: { pt: "Azul Violeta", textColor: "#FFFFFF" },
+  [VisualColorEnum.DODGER_BLUE]: { pt: "Azul", textColor: "#FFFFFF" },
+  [VisualColorEnum.DARK_ORANGE]: { pt: "Laranja", textColor: "#000000" },
+  [VisualColorEnum.LIME_GREEN]: { pt: "Verde", textColor: "#000000" },
+  [VisualColorEnum.APPLE_RED]: { pt: "Vermelho", textColor: "#FFFFFF" },
+  [VisualColorEnum.GOLD]: { pt: "Amarelo", textColor: "#000000" },
+  [VisualColorEnum.BLUE_VIOLET]: { pt: "Violeta", textColor: "#FFFFFF" },
   [VisualColorEnum.DARK_TURQUOISE]: {
-    pt: "Turquesa Escuro",
+    pt: "Turquesa",
     textColor: "#000000",
   },
-  [VisualColorEnum.HOT_PINK]: { pt: "Rosa Quente", textColor: "#000000" },
+  [VisualColorEnum.HOT_PINK]: { pt: "Rosa", textColor: "#000000" },
 };
 
 interface VisualColorPickerProps {
