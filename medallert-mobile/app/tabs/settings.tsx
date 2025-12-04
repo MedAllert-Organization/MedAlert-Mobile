@@ -3,7 +3,7 @@ import { DeleteButton } from "@/components/DeleteButton";
 import env from "@/config/env";
 import Colors from "@/constants/Colors";
 import styles from "@/utils/styles";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
@@ -33,45 +33,62 @@ export default function Settings() {
   const theme = Colors[colorScheme ?? "light"];
   const { logout, token } = useAuth();
 
-  // ---------------------------------------
-  // Buscar timezone atual do usuário
-  // ---------------------------------------
-  const fetchUser = useCallback(async () => {
-    const token = await getToken();
-    const res = await fetch(`${env.BASE_URL}/user/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
 
-    const data = await res.json();
-    setCurrentTimezone(data.user?.timezone?.name ?? null);
-  }, []);
-
-  // ---------------------------------------
-  // Buscar timezones disponíveis
-  // ---------------------------------------
   const fetchTimezones = useCallback(async () => {
-    const res = await fetch(`${env.BASE_URL}/timezone`);
+    const res = await fetch(`${env.BASE_URL}/timezone`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     const data = await res.json();
     setTimezones(data.timezones ?? []);
   }, []);
 
   useEffect(() => {
-    fetchUser();
     fetchTimezones();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCurrentTimezone();
+      fetchTimezones();
+    }, [])
+  );
+
+  const fetchCurrentTimezone = useCallback(async () => {
+    try {
+      const res = await fetch(`${env.BASE_URL}/user/timezone/current`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Falha ao buscar timezone atual");
+
+      const data = await res.json();
+      setCurrentTimezone(data.timezone);
+
+      console.log("Timezone atual:", data.timezone);
+    } catch (err) {
+      console.log("Erro ao buscar timezone atual:", err);
+    }
+  }, []);
+
 
 
   const updateTimezone = async (timezoneName: string) => {
     try {
       const token = await getToken();
 
-      const res = await fetch(`${env.BASE_URL}/user/timezone`, {
+      const res = await fetch(`${env.BASE_URL}/timezone`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        // body: JSON.stringify({ timezoneName }),
+        body: JSON.stringify({ timezoneName }),
       }
       );
 
@@ -121,7 +138,8 @@ export default function Settings() {
           borderRadius: 10,
           backgroundColor: theme.background,
         }}
-        onPress={() => setModalVisible(true)}
+        onPress={() => setModalVisible(true)
+        }
       >
         <Text style={{ color: theme.text, fontSize: 16 }}>
           Timezone atual:
@@ -151,55 +169,88 @@ export default function Settings() {
       <DeleteButton title="Apagar Conta" onPress={deleteAccount} />
 
 
-      <Modal visible={modalVisible} animationType="slide">
-        <View style={{ flex: 1, padding: 20 }}>
-          <Text
+      <Modal visible={modalVisible} animationType="fade" transparent>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <View
             style={{
-              fontSize: 20,
-              marginBottom: 20,
-              fontWeight: "bold",
-              color: theme.text,
+              width: "100%",
+              maxHeight: "70%",
+              backgroundColor: theme.background,
+              borderRadius: 16,
+              padding: 20,
+              shadowColor: "#000",
+              shadowOpacity: 0.25,
+              shadowOffset: { width: 0, height: 2 },
+              shadowRadius: 4,
+              elevation: 5,
             }}
-          >
-            Escolha seu timezone
-          </Text>
-
-          <FlatList
-            data={timezones}
-            keyExtractor={(t) => t.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={{
-                  padding: 12,
-                  borderBottomWidth: 0.5,
-                  borderColor: theme.text,
-                }}
-                onPress={() => updateTimezone(item.name)}
-              >
-                <Text style={{ color: theme.text, fontSize: 16 }}>
-                  {item.label} (UTC {item.utcOffset / 60})
-                </Text>
-              </TouchableOpacity>
-            )}
-          />
-
-          <TouchableOpacity
-            style={{
-              marginTop: 20,
-              padding: 12,
-              borderRadius: 10,
-              backgroundColor: theme.tint,
-            }}
-            onPress={() => setModalVisible(false)}
           >
             <Text
-              style={{ color: "#fff", textAlign: "center", fontSize: 16 }}
+              style={{
+                fontSize: 20,
+                marginBottom: 16,
+                fontWeight: "bold",
+                color: theme.text,
+                textAlign: "center",
+              }}
             >
-              Fechar
+              Escolha seu Timezone
             </Text>
-          </TouchableOpacity>
+
+            <FlatList
+              data={timezones}
+              keyExtractor={(t) => t.id}
+              contentContainerStyle={{ paddingBottom: 10 }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={{
+                    paddingVertical: 14,
+                    paddingHorizontal: 8,
+                    borderBottomWidth: 0.5,
+                    borderColor: theme.text + "33",
+                  }}
+                  onPress={() => updateTimezone(item.name)}
+                >
+                  <Text style={{ color: theme.text, fontSize: 16 }}>
+                    {item.label} (UTC {item.utcOffset})
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+
+            {/* Botão fechar */}
+            <TouchableOpacity
+              style={{
+                marginTop: 20,
+                padding: 12,
+                borderRadius: 10,
+                backgroundColor: theme.tint,
+              }}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text
+                style={{
+                  color: "#fff",
+                  textAlign: "center",
+                  fontWeight: "600",
+                  fontSize: 16,
+                }}
+              >
+                Fechar
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
+
     </Background>
   );
 }

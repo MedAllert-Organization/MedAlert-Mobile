@@ -28,7 +28,6 @@ export default function Index() {
   registerPush();
 }, []);
 
-
    Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowBanner: true,

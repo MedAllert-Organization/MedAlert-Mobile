@@ -21,7 +21,11 @@ import MedicationIcon from "@/components/MedicationIcon";
 
 function convertToUserTimezone(dateString: string, timezone: string) {
   try {
+    if (!dateString) return null;
+
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return null;
+
     const now = new Date();
 
     const formatted = new Intl.DateTimeFormat("pt-BR", {
@@ -57,31 +61,19 @@ export default function Initial() {
 
   const updateNotifications = async (meds: Medication[]) => {
     try {
-      console.log("🔄 Cancelando todas notificações existentes...");
       await Notifications.cancelAllScheduledNotificationsAsync();
 
       for (const med of meds) {
         if (!med.nextTakeAt) continue;
 
         const nextAlert = new Date(med.nextTakeAt);
+        if (isNaN(nextAlert.getTime())) continue;
 
-        if (isNaN(nextAlert.getTime())) {
-          console.log(`❌ Data inválida para ${med.name}:`, med.nextTakeAt);
-          continue;
-        }
+        if (nextAlert.getTime() <= Date.now()) continue;
 
-        if (nextAlert.getTime() <= Date.now()) {
-          console.log(`⏩ Horário de ${med.name} já passou, ignorado.`);
-          continue;
-        }
-
-        console.log(
-          `📆 Agendando notificação para ${med.name} → ${nextAlert.toISOString()}`
-        );
-
-        const notificationId = await Notifications.scheduleNotificationAsync({
+        await Notifications.scheduleNotificationAsync({
           content: {
-            title: `Lembrete: ${med.name}`,
+            title: `Lembrete: ${med.name ?? "Medicamento"}`,
             body: `Está na hora de tomar ${med.dose || "seu medicamento"}.`,
             sound: true,
           },
@@ -89,11 +81,8 @@ export default function Initial() {
           trigger: {
             type: Notifications.SchedulableTriggerInputTypes.DATE,
             date: nextAlert,
-          }
+          },
         });
-        console.log(await Notifications.getPermissionsAsync())
-
-        console.log(`✅ Notificação agendada com sucesso!`);
       }
     } catch (error) {
       console.error("❌ Erro ao atualizar notificações:", error);
@@ -231,6 +220,8 @@ export default function Initial() {
                       ? convertToUserTimezone(med.nextTakeAt, med.timezone)
                       : null;
 
+                  const v = med.visualType ?? null;
+
                   return (
                     <TouchableOpacity
                       key={`${med.medicationId}-${med.treatmentId}-${idx}`}
@@ -246,27 +237,22 @@ export default function Initial() {
                           },
                         ]}
                       >
-                       
-                   
-                    
-                        <View >
-
+                        <View>
                           <Text style={{ color: theme.text, fontWeight: "600" }}>
-                            {med.name}
+                            {med.name ?? "Medicamento"}
                           </Text>
 
-                          {med.dose && (
+                          {med.dose ? (
                             <Text style={{ color: theme.text, opacity: 0.7 }}>
                               Dose: {med.dose}
                             </Text>
-                          )}
+                          ) : null}
 
-                          {med.takenQuantity != null &&
-                            med.totalQuantity != null && (
-                              <Text style={{ color: theme.text, opacity: 0.6 }}>
-                                Progresso: {med.takenQuantity}/{med.totalQuantity}
-                              </Text>
-                            )}
+                          {med.takenQuantity != null && med.totalQuantity != null ? (
+                            <Text style={{ color: theme.text, opacity: 0.6 }}>
+                              Progresso: {med.takenQuantity}/{med.totalQuantity}
+                            </Text>
+                          ) : null}
 
                           {nextFormatted ? (
                             <Text style={{ color: theme.text, opacity: 0.6 }}>
@@ -279,16 +265,14 @@ export default function Initial() {
                           )}
                         </View>
 
-                              {
-                          med.visualType && (
-                            <MedicationIcon
-                              color={med.visualType.color1}
-                              type={med.visualType.visualType}
-                              size={med.visualType.size}
-                              pattern={med.visualType.pattern}
-                            />
-                          )
-                        }
+                        {v && v.color1 && v.visualType ? (
+                          <MedicationIcon
+                            color={v.color1}
+                            type={v.visualType}
+                            size={v.size ?? "medium"}
+                            pattern={v.pattern ?? "solid"}
+                          />
+                        ) : null}
                       </View>
                     </TouchableOpacity>
                   );
