@@ -215,6 +215,7 @@ export default function ProgressVisualization() {
               const progress = calculateTreatmentProgress(treatment);
               const progressColor = getProgressColor(progress);
 
+
               return (
                 <TouchableOpacity
                   key={treatment.treatmentId}
@@ -231,7 +232,7 @@ export default function ProgressVisualization() {
 
                   <View style={styles.treatmentDates}>
                     <Text style={styles.dateText}>
-                      📅 {formatDate(treatment.startAt)} - {formatDate(treatment.endAt)}
+                      📅 {formatDate(treatment.startAt)} - { treatment.endAt != null ? formatDate(treatment.endAt) : "Sem data de término"}
                     </Text>
                   </View>
 
