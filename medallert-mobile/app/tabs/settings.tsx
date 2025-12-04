@@ -52,7 +52,6 @@ export default function Settings() {
   useFocusEffect(
     useCallback(() => {
       fetchCurrentTimezone();
-      fetchTimezones();
     }, [])
   );
 
@@ -224,7 +223,6 @@ export default function Settings() {
               )}
             />
 
-            {/* Botão fechar */}
             <TouchableOpacity
               style={{
                 marginTop: 20,
