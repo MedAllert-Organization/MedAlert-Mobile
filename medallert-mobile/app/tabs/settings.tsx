@@ -76,25 +76,23 @@ export default function Settings() {
     }
   }, []);
 
-
-
-  const updateTimezone = async (timezoneName: string) => {
+  const updateUserTimezone = async (timezoneId: string) => {
     try {
       const token = await getToken();
 
-      const res = await fetch(`${env.BASE_URL}/timezone`, {
+      const res = await fetch(`${env.BASE_URL}/user/timezone/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ timezoneName }),
+        body: JSON.stringify({ timezoneId }),
       }
       );
 
       if (!res.ok) throw new Error("Falha ao atualizar timezone");
 
-      setCurrentTimezone(timezoneName);
+      setCurrentTimezone(timezoneId);
       setModalVisible(false);
 
       Alert.alert("Sucesso", "Timezone atualizado!");
@@ -217,7 +215,7 @@ export default function Settings() {
                     borderBottomWidth: 0.5,
                     borderColor: theme.text + "33",
                   }}
-                  onPress={() => updateTimezone(item.name)}
+                  onPress={() => updateUserTimezone(item.id)}
                 >
                   <Text style={{ color: theme.text, fontSize: 16 }}>
                     {item.label} (UTC {item.utcOffset})
