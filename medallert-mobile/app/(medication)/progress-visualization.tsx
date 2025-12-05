@@ -1,14 +1,14 @@
-import { Text, View, useColorScheme, StyleSheet, ScrollView, Alert, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Text, View, useColorScheme, StyleSheet, ScrollView, Alert, TouchableOpacity, ActivityIndicator, Platform } from "react-native";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Background from "@/components/Background";
-import { File } from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
 import { useState, useEffect, useCallback } from "react";
 import { getToken } from "@/providers/auth-provider";
 import env from "@/config/env";
 import { router } from "expo-router";
 import { BackButton } from "@/components/BackButton";
 import Colors from "@/constants/Colors";
+import { File, Paths } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 type TreatmentMedication = {
   medicationId: string;
@@ -30,6 +30,7 @@ export default function ProgressVisualization() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingTreatmentId, setGeneratingTreatmentId] = useState<string | null>(null);
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -81,81 +82,94 @@ export default function ProgressVisualization() {
     return "#F44336";
   };
 
-  const handleGenerateReport = async () => {
-    try {
-      Alert.alert(
-        "Escolha o Período",
-        "Selecione o período do relatório:",
-        [
-          {
-            text: "Cancelar",
-            style: "cancel",
-          },
-          {
-            text: "Semanal",
-            onPress: () => downloadReport("Weekly")
-          },
-          {
-            text: "Mensal",
-            onPress: () => downloadReport("Monthly")
-          }
-        ]
-      );
-    } catch (error) {
-      console.error("Erro ao gerar relatório:", error);
-      Alert.alert("Erro", "Não foi possível gerar o relatório");
-    }
-  };
-
-  const downloadReport = async (period: "Weekly" | "Monthly") => {
+  const downloadReport = async (treatmentId: string, treatmentName: string) => {
     try {
       setIsGenerating(true);
+      setGeneratingTreatmentId(treatmentId);
 
       const token = await getToken();
 
-      const response = await fetch(`${env.BASE_URL}/medication/report/${period}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+      const response = await fetch(
+        `${env.BASE_URL}/medication/report/${treatmentId}/report`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Erro ao gerar relatório");
+
+      const blob = await response.blob();
+      const reader = new FileReader();
+
+      await new Promise((resolve, reject) => {
+        reader.onloadend = async () => {
+          try {
+            const base64String = reader.result as string;
+            const base64Pdf = base64String.split(',')[1];
+
+            // Salva o arquivo no cache usando a API correta
+            const sanitizedName = treatmentName.replace(/[^a-zA-Z0-9]/g, "_");
+            const fileName = `relatorio_${sanitizedName}_${Date.now()}.pdf`;
+
+            // Cria o arquivo no diretório de cache
+            const file = new File(Paths.cache, fileName);
+
+            // Escreve o conteúdo base64 no arquivo
+            await file.write(base64Pdf, { encoding: 'base64' });
+
+            console.log('Arquivo salvo em:', file.uri);
+
+            // Compartilhar o arquivo usando o menu nativo do Android
+            const sharingAvailable = await Sharing.isAvailableAsync();
+            if (sharingAvailable) {
+              await Sharing.shareAsync(file.uri, {
+                mimeType: 'application/pdf',
+                dialogTitle: 'Salvar Relatório',
+                UTI: 'com.adobe.pdf'
+              });
+              Alert.alert("Sucesso", "Relatório gerado! Escolha onde salvar.");
+            } else {
+              Alert.alert("Erro", "Compartilhamento não está disponível neste dispositivo");
+            }
+
+            resolve(true);
+          } catch (error) {
+            reject(error);
+          }
+        };
+
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao gerar relatório');
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-
-      const periodLabel = period === "Weekly" ? "semanal" : "mensal";
-      const fileName = `relatorio_${periodLabel}_${Date.now()}.pdf`;
-
-      const file = new File(fileName);
-
-      await file.create();
-      await file.write(uint8Array);
-
-      const fileUri = file.uri;
-
-      const isAvailable = await Sharing.isAvailableAsync();
-
-      if (isAvailable) {
-        await Sharing.shareAsync(fileUri, {
-          mimeType: 'application/pdf',
-          dialogTitle: 'Salvar Relatório',
-          UTI: 'com.adobe.pdf'
-        });
-
-        Alert.alert("Sucesso", "Relatório gerado com sucesso!");
-      } else {
-        Alert.alert("Sucesso", `Relatório salvo em: ${fileUri}`);
-      }
-    } catch (error) {
-      console.error("Erro ao baixar relatório:", error);
-      Alert.alert("Erro", "Houve um erro ao gerar o relatório!");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Erro", "Não foi possível gerar o relatório");
     } finally {
       setIsGenerating(false);
+      setGeneratingTreatmentId(null);
     }
+  };
+
+
+  const handleGenerateReport = (treatmentId: string, treatmentName: string) => {
+    Alert.alert(
+      "Gerar Relatório",
+      `Deseja gerar o relatório do tratamento "${treatmentName}"?`,
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Gerar",
+          onPress: () => downloadReport(treatmentId, treatmentName)
+        }
+      ]
+    );
   };
 
   const formatDate = (dateString: string): string => {
@@ -196,7 +210,7 @@ export default function ProgressVisualization() {
         Acompanhe seus tratamentos
       </Text>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 120, alignItems: "center", paddingHorizontal: 16 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40, alignItems: "center", paddingHorizontal: 16 }}>
 
         {isLoading ? (
           <ActivityIndicator size="large" color={theme.tint} style={{ marginTop: 40 }} />
@@ -214,80 +228,90 @@ export default function ProgressVisualization() {
             {treatments.map((treatment) => {
               const progress = calculateTreatmentProgress(treatment);
               const progressColor = getProgressColor(progress);
-
+              const isGeneratingThis = generatingTreatmentId === treatment.treatmentId;
 
               return (
-                <TouchableOpacity
-                  key={treatment.treatmentId}
-                  style={styles.treatmentCard}
-                  onPress={() => router.push(`/detail-treatment?id=${treatment.treatmentId}`)}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.treatmentHeader}>
-                    <Text style={styles.treatmentName}>{treatment.name}</Text>
-                    <View style={[styles.progressBadge, { backgroundColor: progressColor }]}>
-                      <Text style={styles.progressText}>{progress}%</Text>
+                <View key={treatment.treatmentId} style={styles.treatmentCard}>
+                  <TouchableOpacity
+                    onPress={() => router.push(`/detail-treatment?id=${treatment.treatmentId}`)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.treatmentHeader}>
+                      <Text style={styles.treatmentName}>{treatment.name}</Text>
+                      <View style={[styles.progressBadge, { backgroundColor: progressColor }]}>
+                        <Text style={styles.progressText}>{progress}%</Text>
+                      </View>
                     </View>
-                  </View>
 
-                  <View style={styles.treatmentDates}>
-                    <Text style={styles.dateText}>
-                      📅 {formatDate(treatment.startAt)} - { treatment.endAt != null ? formatDate(treatment.endAt) : "Sem data de término"}
-                    </Text>
-                  </View>
-
-                  <View style={styles.progressBarContainer}>
-                    <View
-                      style={[
-                        styles.progressBarFill,
-                        {
-                          width: `${progress}%`,
-                          backgroundColor: progressColor
-                        }
-                      ]}
-                    />
-                  </View>
-
-                  {treatment.medications && treatment.medications.length > 0 && (
-                    <View style={styles.medicationsSection}>
-                      <Text style={styles.medicationsTitle}>
-                        Medicamentos ({treatment.medications.length})
+                    <View style={styles.treatmentDates}>
+                      <Text style={styles.dateText}>
+                        📅 {formatDate(treatment.startAt)} - {formatDate(treatment.endAt)}
                       </Text>
-                      {treatment.medications.map((med) => {
-                        const medProgress = calculateProgress(med);
-                        return (
-                          <View key={med.medicationId} style={styles.medicationRow}>
-                            <View style={styles.medicationInfo}>
-                              <Text style={styles.medicationName}>💊 {med.name}</Text>
-                              <Text style={styles.medicationDose}>{med.dose}</Text>
-                            </View>
-                            <View style={styles.medicationProgress}>
-                              <Text style={styles.medicationProgressText}>
-                                {med.takenQuantity}/{med.totalQuantity}
-                              </Text>
-                              <Text style={[styles.medicationPercentage, { color: getProgressColor(medProgress) }]}>
-                                {medProgress}%
-                              </Text>
-                            </View>
-                          </View>
-                        );
-                      })}
                     </View>
-                  )}
-                </TouchableOpacity>
+
+                    <View style={styles.progressBarContainer}>
+                      <View
+                        style={[
+                          styles.progressBarFill,
+                          {
+                            width: `${progress}%`,
+                            backgroundColor: progressColor
+                          }
+                        ]}
+                      />
+                    </View>
+
+                    {treatment.medications && treatment.medications.length > 0 && (
+                      <View style={styles.medicationsSection}>
+                        <Text style={styles.medicationsTitle}>
+                          Medicamentos ({treatment.medications.length})
+                        </Text>
+                        {treatment.medications.map((med) => {
+                          const medProgress = calculateProgress(med);
+                          return (
+                            <View key={med.medicationId} style={styles.medicationRow}>
+                              <View style={styles.medicationInfo}>
+                                <Text style={styles.medicationName}>💊 {med.name}</Text>
+                                <Text style={styles.medicationDose}>{med.dose}</Text>
+                              </View>
+                              <View style={styles.medicationProgress}>
+                                <Text style={styles.medicationProgressText}>
+                                  {med.takenQuantity}/{med.totalQuantity}
+                                </Text>
+                                <Text style={[styles.medicationPercentage, { color: getProgressColor(medProgress) }]}>
+                                  {medProgress}%
+                                </Text>
+                              </View>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    )}
+                  </TouchableOpacity>
+
+                  <View style={styles.reportButtonContainer}>
+                    <TouchableOpacity
+                      style={[
+                        styles.reportButton,
+                        isGeneratingThis && styles.reportButtonDisabled
+                      ]}
+                      onPress={() => handleGenerateReport(treatment.treatmentId, treatment.name)}
+                      disabled={isGeneratingThis || isGenerating}
+                      activeOpacity={0.8}
+                    >
+                      {isGeneratingThis ? (
+                        <ActivityIndicator size="small" color="white" />
+                      ) : (
+                        <Text style={styles.reportButtonText}>📄 Gerar Relatório PDF</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
               );
             })}
           </View>
         )}
       </ScrollView>
-
-      <View style={styles.fixedButtonContainer}>
-        <ButtonPrimary
-          title={isGenerating ? "Gerando..." : "📄 Gerar Relatório PDF"}
-          onPress={handleGenerateReport}
-          disabled={isGenerating}
-        />
-      </View>
     </Background>
   );
 }
@@ -404,6 +428,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
     paddingTop: 12,
+    marginBottom: 12,
   },
 
   medicationsTitle: {
@@ -452,10 +477,30 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  fixedButtonContainer: {
-    position: "absolute",
-    bottom: 20,
-    width: "80%",
-    alignSelf: "center",
+  reportButtonContainer: {
+    marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+    paddingTop: 12,
+  },
+
+  reportButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+
+  reportButtonDisabled: {
+    backgroundColor: '#B0BEC5',
+  },
+
+  reportButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
