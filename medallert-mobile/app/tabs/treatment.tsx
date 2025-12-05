@@ -16,7 +16,7 @@ import styles from "@/utils/styles";
 import env from "@/config/env";
 import { SharedTreatments } from "@/components/SharedTreatments";
 import { Treatment } from "@/constants/Models";
-
+import ButtonPrimary from "@/components/ButtonPrimary";
 
 export default function TreatmentView() {
   const { logout, token } = useAuth();
