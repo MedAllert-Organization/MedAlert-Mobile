@@ -16,7 +16,7 @@ import env from "@/config/env";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import Background from "@/components/Background";
-import { Medication } from "@/constants/Models";
+import { Medication, TreatmentMedication } from "@/constants/Models";
 import MedicationIcon from "@/components/MedicationIcon";
 
 function convertToUserTimezone(dateString: string, timezone: string) {
@@ -56,10 +56,10 @@ export default function Initial() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const [medicines, setMedicines] = useState<Medication[]>([]);
+  const [medicines, setMedicines] = useState<TreatmentMedication[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const updateNotifications = async (meds: Medication[]) => {
+  const updateNotifications = async (meds: TreatmentMedication[]) => {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
 
@@ -73,7 +73,7 @@ export default function Initial() {
 
         await Notifications.scheduleNotificationAsync({
           content: {
-            title: `Lembrete: ${med.name ?? "Medicamento"}`,
+            title: `Lembrete: ${med.medication?.name ?? "Medicamento"}`,
             body: `Está na hora de tomar ${med.dose || "seu medicamento"}.`,
             sound: true,
           },
@@ -136,10 +136,10 @@ export default function Initial() {
     }, [token])
   );
 
-  const confirmTaken = (med: Medication) => {
+  const confirmTaken = (med: TreatmentMedication) => {
     Alert.alert(
       "Confirmar medicação",
-      `Você tomou ${med.name}?`,
+      `Você tomou ${med.medication?.name}?`,
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -239,7 +239,7 @@ export default function Initial() {
                       >
                         <View>
                           <Text style={{ color: theme.text, fontWeight: "600" }}>
-                            {med.name ?? "Medicamento"}
+                            {med.medication?.name ?? "Medicamento"}
                           </Text>
 
                           {med.dose ? (

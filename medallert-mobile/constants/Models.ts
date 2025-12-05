@@ -1,22 +1,11 @@
 export type Medication = {
   medicationId: string;
-  treatmentId?: string | null;
   userId?: string | null;
   name: string;
-  dose?: string | null;
   description?: string;
-  visualTypeId?: string;
-  visualType: VisualType | null;
   soundTypeId?: string;
-  alertPeriodInMinutes?: number | null;
-  endTreatmentAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
-  takenQuantity?: number | null;
-  totalQuantity?: number | null;
-  lastTaken?: string | null;
-  nextTakeAt?: string | null;
-  timezone?: TimezoneEntity | null;
 };
 
 export type TimezoneEntity = {
@@ -27,12 +16,20 @@ export type TimezoneEntity = {
 };
 
 export type TreatmentMedication = {
-  medicationId: string;
-  name: string;
-  dose: string;
-  takenQuantity: number;
-  totalQuantity: number;
-  visualType: VisualType | null;
+  id: string;
+  treatmentId?: string | null;
+  medicationId?: string | null;
+  dose?: string | null;
+  takenQuantity?: number | null;
+  totalQuantity?: number | null;
+  treatment?: Treatment | null;
+  medication?: Medication | null;
+  visualTypeId?: string | null;
+  visualType?: VisualType | null;
+  lastTaken?: string | null;
+  nextTakeAt?: string | null;
+  timezone?: TimezoneEntity | null;
+  alertPeriodInMinutes?: number | null;
 };
 
 export type Treatment = {

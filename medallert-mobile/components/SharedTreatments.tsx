@@ -63,7 +63,7 @@ export function SharedTreatments() {
 
   function handlePress(treatmentId: string) {
     router.push({
-      pathname: "/treatment-detail",
+      pathname: "/detail-treatment",
       params: { id: treatmentId },
     });
   }
