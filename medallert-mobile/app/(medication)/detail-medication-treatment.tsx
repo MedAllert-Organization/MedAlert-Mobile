@@ -4,23 +4,47 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
-  ScrollView,
   useColorScheme,
 } from "react-native";
 import Colors from "@/constants/Colors";
 import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
 import {
-  Medication,
-  VisualSizeEnum,
   VisualType,
-  VisualTypeEnum,
 } from "@/constants/Models";
 import MedicationIcon from "@/components/MedicationIcon";
 
 interface Props {
   medication: Medication;
 }
+
+export type Medication = {
+  medicationId: string;
+  userId?: string | null;
+  name?: string | null;
+  description?: string;
+  soundTypeId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  dose: string | null;
+  visualType?: VisualType | null;
+  alertPeriodInMinutes?: number | null;
+  takenQuantity?: number | null;
+  totalQuantity?: number | null;
+  lastTaken?: string | null;
+};
+
+export type Treatment = {
+  treatmentId: string;
+  userId?: string | null;
+  name?: string | null;
+  description?: string | null;
+  startAt?: string | null;
+  endAt?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  medications?: Medication[] | null;
+};
 
 export default function MedicineTreatmentDetail({ medication }: Props) {
   const [generalInfo, setGeneralInfo] = useState<Medication | null>(null);

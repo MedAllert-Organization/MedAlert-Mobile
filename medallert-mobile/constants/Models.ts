@@ -8,13 +8,6 @@ export type Medication = {
   updatedAt?: string;
 };
 
-export type TimezoneEntity = {
-  id: string;
-  name: string;
-  label: string;
-  utcOffset: number;
-};
-
 export type TreatmentMedication = {
   id: string;
   treatmentId?: string | null;
@@ -88,3 +81,10 @@ export interface VisualType {
   color2: string | null;
   pattern: VisualPatternEnum;
 }
+
+export type TimezoneEntity = {
+  id: string;
+  name: string;
+  label: string;
+  utcOffset: number;
+};

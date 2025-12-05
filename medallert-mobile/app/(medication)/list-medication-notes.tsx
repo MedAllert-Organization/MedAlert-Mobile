@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getToken } from "@/providers/auth-provider";
 import env from "@/config/env";
 import { router } from "expo-router";
-import { Medication } from "@/constants/Models";
+import { Medication } from "./detail-medication-treatment";
 
 type AnnotationsCount = {
     [medicationId: string]: number;
@@ -34,7 +34,6 @@ export default function MedicationNotesList() {
             const response = await res.json();
             setMedications(response.medications || []);
 
-            // Buscar contagem de anotações para cada medicamento
             const counts: AnnotationsCount = {};
             for (const med of response.medications || []) {
                 const annotationsRes = await fetch(
@@ -66,7 +65,7 @@ export default function MedicationNotesList() {
 
     const handleMedicationPress = (medication: Medication) => {
         router.push({
-            pathname: "/medication-notes-detail",
+            pathname: "/detail-medication-notes",
             params: {
                 medicationId: medication.medicationId,
                 medicationName: medication.name,

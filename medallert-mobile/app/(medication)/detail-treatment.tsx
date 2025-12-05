@@ -18,8 +18,7 @@ import env from "@/config/env";
 import { getToken } from "@/providers/auth-provider";
 import { BackButton } from "@/components/BackButton";
 import Background from "@/components/Background";
-import MedicineTreatmentDetail from "./detail-medication-treatment";
-import { Treatment } from "@/constants/Models";
+import MedicineTreatmentDetail, { Treatment } from "./detail-medication-treatment";
 
 export default function TreatmentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

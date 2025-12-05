@@ -1,5 +1,5 @@
+import { Medication } from "@/app/(medication)/detail-medication-treatment";
 import Colors from "@/constants/Colors";
-import { Medication } from "@/constants/Models";
 import styles from "@/utils/styles";
 import { router } from "expo-router";
 import {

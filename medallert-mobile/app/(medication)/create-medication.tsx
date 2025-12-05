@@ -156,7 +156,6 @@ export default function CreateMedication() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-
         }}
       >
         <View style={{ paddingBottom: 20 }}>
