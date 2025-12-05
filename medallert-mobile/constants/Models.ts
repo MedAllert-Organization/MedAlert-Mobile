@@ -16,7 +16,14 @@ export type Medication = {
   totalQuantity?: number | null;
   lastTaken?: string | null;
   nextTakeAt?: string | null;
-  timezone?: string;
+  timezone?: TimezoneEntity | null;
+};
+
+export type TimezoneEntity = {
+  id: string;
+  name: string;
+  label: string;
+  utcOffset: number;
 };
 
 export type TreatmentMedication = {

@@ -217,7 +217,7 @@ export default function Initial() {
                 {medicines.map((med, idx) => {
                   const nextFormatted =
                     med.nextTakeAt && med.timezone
-                      ? convertToUserTimezone(med.nextTakeAt, med.timezone)
+                      ? convertToUserTimezone(med.nextTakeAt, med.timezone.name)
                       : null;
 
                   const v = med.visualType ?? null;
